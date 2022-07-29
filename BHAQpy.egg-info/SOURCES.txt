@@ -2,8 +2,8 @@ README.md
 setup.py
 BHAQpy/MyFeedback.py
 BHAQpy/__init__.py
+BHAQpy/aqgisproject.py
 BHAQpy/aqmonitoring.py
-BHAQpy/aqqgisproject.py
 BHAQpy/getdefrabackground.py
 BHAQpy/modelledroads.py
 BHAQpy/projectsite.py

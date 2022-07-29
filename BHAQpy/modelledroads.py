@@ -31,11 +31,11 @@ from qgis.analysis import QgsNativeAlgorithms
 import processing
 from processing.core.Processing import Processing
 
-from ADMSQpy.utils import (select_layer_by_name,
+from BHAQpy.utils import (select_layer_by_name,
                    attributes_table_df,
                    write_ADMS_input_file)
 
-from ADMSQpy.trafficcountpoints import TrafficCountPoints
+from BHAQpy.trafficcountpoints import TrafficCountPoints
 
 class ModelledRoads():    
     

@@ -35,18 +35,18 @@ from qgis.analysis import QgsNativeAlgorithms
 import processing
 from processing.core.Processing import Processing
 
-import ADMSQpy
+import BHAQpy
 
-from ADMSQpy.modelledroads import ModelledRoads
+from BHAQpy.modelledroads import ModelledRoads
 
-from ADMSQpy.utils import (select_layer_by_name,
+from BHAQpy.utils import (select_layer_by_name,
                            save_to_gpkg,
                            save_raster)
 
-from ADMSQpy.MyFeedback import MyFeedBack
-from ADMSQpy.getdefrabackground import get_defra_background_concentrations
+from BHAQpy.MyFeedback import MyFeedBack
+from BHAQpy.getdefrabackground import get_defra_background_concentrations
 
-class AqQgisProjectBasemap():
+class AQgisProjectBasemap():
     def __init__(self, project_path, run_environment = "qgis_gui"):
        self.project_path = project_path
        
@@ -98,7 +98,7 @@ class AqQgisProjectBasemap():
         # save to new project and initiate project object
         new_project = base_project.write(project_qgs_path)
     
-        new_ADMSQ_project = AqQgisProject(project_qgs_path, run_environment=self.run_environment)
+        new_ADMSQ_project = AQgisProject(project_qgs_path, run_environment=self.run_environment)
         new_ADMSQ_project.set_gpkg_path(gpkg_path)
         
         new_project = new_ADMSQ_project.get_project()
@@ -174,7 +174,7 @@ class AqQgisProjectBasemap():
         new_ADMSQ_project.save()
         return new_ADMSQ_project
 #%%
-class AqQgisProject(AqQgisProjectBasemap):
+class AQgisProject(AQgisProjectBasemap):
     
     def __init__(self, project_path, run_environment = "qgis_gui"):
         super().__init__(project_path, run_environment)
@@ -250,8 +250,8 @@ class AqQgisProject(AqQgisProjectBasemap):
         else:
             buffer_layer = QgsVectorLayer(buffer_result['OUTPUT'], site_geom.name(), "ogr")
         
-        ADMSQpy_dir = os.path.split(ADMSQpy.__path__[0])[0]
-        styles_dir = os.path.join(ADMSQpy_dir, 'templates', 'styles')
+        BHAQpy_dir = os.path.split(BHAQpy.__path__[0])[0]
+        styles_dir = os.path.join(BHAQpy_dir, 'templates', 'styles')
         
         #TODO: replace this crap
         style_path = os.path.join(styles_dir , str(buffer_size)+'m buffer')
@@ -290,8 +290,11 @@ class AqQgisProject(AqQgisProjectBasemap):
             gpkg_write_path = self.gpkg_path
             
         modelled_roads = ModelledRoads(proj, modelled_roads_layer_name,
-                                       gpkg_write_path, traffic_count_point_id_col_name, 
-                                       width_col_name, speed_col_name, overwrite_gpkg_layer)
+                                       gpkg_write_path, 
+                                       traffic_count_point_id_col_name = traffic_count_point_id_col_name, 
+                                       width_col_name = width_col_name, 
+                                       speed_col_name = speed_col_name, 
+                                       overwrite_gpkg_layer = overwrite_gpkg_layer)
         
         
         return modelled_roads

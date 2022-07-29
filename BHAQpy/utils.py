@@ -19,7 +19,7 @@ from qgis.core import (
 
 import processing
 
-from ADMSQpy.MyFeedback import MyFeedBack
+from BHAQpy.MyFeedback import MyFeedBack
 
 def select_layer_by_name(layer_name, project):
     '''
