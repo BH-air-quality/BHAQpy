@@ -1,0 +1,32 @@
+SPTVersion2
+!Exported from ADMS-Roads 5.0.0 on 18/03/2022
+!parameter file: 
+!Supported traffic emissions datasets: 
+!EFT v9.0 (2 VC)
+!EFT v9.0 (6 VC)
+!EFT v9.0 (7 VC)
+!EFT v9.0 (8 VC)
+!EFT v8.0 (2 VC)
+!EFT v8.0 (6 VC)
+!EFT v8.0 (7 VC)
+!EFT v8.0 (8 VC)
+!EFT v7.0 (2 VC)
+!EFT v7.0 (6 VC)
+!EFT v7.0 (7 VC)
+!EFT v7.0 (8 VC)
+!EFT v6.0.1 (2 VC)
+!EFT v6.0.1 (6 VC)
+!EFT v6.0.1 (7 VC)
+!EFT v6.0.1 (8 VC)
+!EFT v5.1 (2 VC)
+!EFT v5.1 (6 VC)
+!EFT v5.1 (7 VC)
+!EFT v5.1 (8 VC)
+!EFT v4.2 (2 VC)
+!EFT v4.2 (6 VC)
+!UK DMRB IAN 185/15
+!DMRB 2003
+!DMRB 1999
+!Chinese MoT 2006
+Traffic dataset name | EFT v9.0 (2 VC)
+Source name, Use VAR file, Specific heat capacity (J/kg/K), Molecular mass (g), Temperature or density?, Temperature (Degrees C) / Density (kg/m3), Actual or NTP?, Efflux type keyword, Velocity (m/s) / Volume flux (m3/s) / Momentum flux (m4/s2) / Mass flux (kg/s), Heat release rate (MW), Source type, Height (m), Diameter (m), Line width (m) / Road width (m) / Volume depth (m) / Grid depth (m), Canyon height (m), Angle 1 (deg), Angle 2 (deg), Mixing ratio (kg/kg), Traffic flows used, Traffic flow year, Traffic flow road type, Gradient, Main building, Comments
