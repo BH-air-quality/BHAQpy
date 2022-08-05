@@ -14,32 +14,29 @@ def get_defra_background_concentrations(coordinates : list, background_region : 
                                         pollutants = ['no2', 'nox', 'pm10', 'pm25'],
                                         base_year = '2018', split_by_source=False):
     """
-    
+    Get defra modelled background concentrations at specified coordinates.
 
     Parameters
     ----------
     coordinates : list
-        DESCRIPTION.
+        List of coordinates representing a singular point or a maximum and minimum extent. Must be in epsg:27700 crs. e.g. [5000, 7000] or [[50000, 70000], [51000, 71000]]
     background_region : str
-        DESCRIPTION.
+        Background region as defined in defra background maps. Options: Greater_London, East_of_England, Midlands, Northern_England, Northern_Ireland, Scotland, Southern_England, Wales.
     year : int
         DESCRIPTION.
-    pollutants : TYPE, optional
-        DESCRIPTION. The default is ['no2', 'nox', 'pm10', 'pm25'] : list.
-    base_year : TYPE, optional
-        DESCRIPTION. The default is '2018' : int.
-    split_by_source : TYPE, optional
-        DESCRIPTION. The default is False : bool.
-
-    Raises
-    ------
-    Exception
-        DESCRIPTION.
+    year : int
+        The background year to get.
+    pollutants : list, optional
+        Pollutants to get background concentrations for. The default is ['no2', 'nox', 'pm10', 'pm25'].
+    base_year : int, optional
+        Base year of modelled background concentrations. The default is '2018'.
+    split_by_source : Bool, optional
+        Whether to split contributions of background concentrations into sources. The default is False.
 
     Returns
     -------
-    background_concentrations : TYPE
-        DESCRIPTION.
+    background_concentrations : pandas.DataFrame
+        Dataframe of background concentrations at grid square(s) coordinates are within.
 
     """
     

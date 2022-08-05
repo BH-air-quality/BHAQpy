@@ -31,13 +31,56 @@ from qgis.analysis import QgsNativeAlgorithms
 import processing
 from processing.core.Processing import Processing
 
-from BHAQpy.utils import (select_layer_by_name,
+from BHAQpy._utils import (select_layer_by_name,
                    attributes_table_df,
                    write_ADMS_input_file)
 
 from BHAQpy.trafficcountpoints import TrafficCountPoints
 
-class ModelledRoads():    
+class ModelledRoads():  
+    
+
+    """
+    A BHAQpy object representing the roads data in QGIS that should be manipulated and imported into an ADMS model
+    
+    Attributes
+    ----------
+    project : BHAQpy.AQgisProject
+        The AQgisProject in which the modelled roads correspond to
+    
+    gpkg_write_path : str
+        Where the modelled roads layer is written to.
+    
+    layer : QGSVectorLayer 
+        The pyqgis layer for the modelled roads object
+    
+    
+    Methods
+    -------
+    
+    get_attributes_df()
+        get a pandas datarame of road attributes
+    
+    match_to_TCP()
+        Match road geomtry to traffic count point information.
+    
+    generate_SPT()
+        create an ADMS spt file for the drawn roads
+        
+    generate_VGT()
+        create a vgt file for the drawn roads
+        
+    generate_EFT_input()
+        generate a file that can be copied directly into EFT spreadsheet
+    
+    generate_EIT()
+        create an eit file for the drawn roads
+    
+    calculate_gradients()
+        calculate the gradient of the drawn roads. This can then be used in EFT calculations.
+    
+    """
+    
     
     def __init__(self, project, source=None, gpkg_write_path='modelled_roads.gpkg', 
                  gpkg_layer_name = 'Modelled Roads ADMS',
@@ -46,6 +89,40 @@ class ModelledRoads():
                  junction_col_name = 'Junction', road_height_col_name = 'Height',
                  canyon_height_col_name = 'Canyon height',
                  overwrite_gpkg_layer=False):
+        """
+        
+
+        Parameters
+        ----------
+        project : BHAQpy.AQgisProject
+            The AQgisProject in which the modelled roads are added to
+        source : str, optional
+            The layer within a project or the path to a file containing drawn modelled roads. If None then a new layer is created. The default is None.
+        gpkg_write_path : str, optional
+            The path to the geopackage where the modelled roads layer will be written. The default is 'modelled_roads.gpkg'.
+        gpkg_layer_name : str, optional
+            The name of the geopackage layer the modelled roads will be saved to. The default is 'Modelled Roads ADMS'.
+        traffic_count_point_id_col_name : str, optional
+            The attribute name representing the traffic count point ID. The default is 'TCP ID'.
+        width_col_name : str, optional
+            The attribute name representing the road width in m. The default is 'Width'.
+        speed_col_name : str, optional
+            The attribute name representing the traffic speed in kph. The default is 'Speed'.
+        junction_col_name : str, optional
+            The attribute name representing the boolean value determining if the link is a junction. The default is 'Junction'.
+        road_height_col_name : str, optional
+            The attribute name representing the road height in metres. The default is 'Height'.
+        canyon_height_col_name : str, optional
+            The attribute name representing the canyon height in metres. The default is 'Canyon height'.
+        overwrite_gpkg_layer : bool, optional
+            If geopackage layer exists already, should this be overwritten. The default is False.
+
+        Returns
+        -------
+        None.
+
+        """
+        
         
         self.project = project
         self.gpkg_write_path = gpkg_write_path 
@@ -83,9 +160,34 @@ class ModelledRoads():
         return
         
     def get_attributes_df(self):
+        """
+        Get attributes of drawn roads as a dataframe
+
+        Returns
+        -------
+        pandas.DataFrame
+            A pandas dataframe with all attributes and values of modelled roads.
+
+        """
+        
         return self._attr_df
     
     def match_to_TCP(self, traffic_count_points : TrafficCountPoints):
+        """
+        Add traffic information to modelled roads by matching modelled roads to traffic count points.
+
+        Parameters
+        ----------
+        traffic_count_points : TrafficCountPoints
+            BHAQpy.TrafficCountPoints object with ID's that match the modelled roads TCP ID attribute.
+
+        Returns
+        -------
+        roads_TCP : pandas.DataFrame
+            Dataframe containing modelled roads attributes with traffic information.
+
+        """
+        
         #TODO: match by intersection
         #TODO: add to traffic count point attributes
             
@@ -102,10 +204,26 @@ class ModelledRoads():
     def generate_SPT(self, output_file = None, headers_file = 'ADMS_template_v5.spt', 
                      traffic_flow_year = 2019, traffic_flow_road_type = 'London (Inner)'):
         
-        '''
-        Format into SPT format and save to spt file if specified
-        '''
-        
+        """
+        Format roads into SPT format and save to spt file if specified
+
+        Parameters
+        ----------
+        output_file : str, optional
+            Path to save spt file. If None then no file is saved. The default is None.
+        headers_file : str, optional
+            A path to a file containing ADMS headers for an spt file. These can be automatically generated within ADMS (see manual). The default is 'ADMS_template_v5.spt'.
+        traffic_flow_year : int, optional
+            The traffic flow year. Not strictly used in modelling (as we create an EIT) but is good for consistency. The default is 2019.
+        traffic_flow_road_type : str, optional
+            The traffic flow road type, as specified in EFT documentation. Not strictly used in modelling (as we create an EIT) but is good for consistency. The default is 'London (Inner)'.
+
+        Returns
+        -------
+        spt_data : pandas.DataFrame
+            Dataframe of modelled roads formatted into a spt format.
+
+        """
         #TODO: check road types comply
       
         attr_df = self.get_attributes_df()
@@ -143,6 +261,22 @@ class ModelledRoads():
         return spt_data
     
     def generate_VGT(self, output_file = None, headers_file = 'ADMS_template_v5.vgt'):
+        """
+        Format roads into SPT format and save to spt file if specified
+
+        Parameters
+        ----------
+        output_file : str, optional
+            Path to save vgt file. If None then no file is saved. The default is None.
+        headers_file : str, optional
+            A path to a file containing ADMS headers for a vgt file. These can be automatically generated within ADMS (see manual). The default is 'ADMS_template_v5.vgt'.
+
+        Returns
+        -------
+        vgt_data : pandas.DataFrame
+            Dataframe of drawn roads in a VGT format.
+
+        """
         verticies = self._extract_verticies()
         
         #extract
@@ -162,6 +296,29 @@ class ModelledRoads():
     
     def generate_EFT_input(self, traffic_count_points, road_type, output_file = None, 
                            no_of_hours = 24, flow_direction = None):
+        """
+        Format roads into a format that can be directly copied into EFT spreadsheet
+
+        Parameters
+        ----------
+        traffic_count_points : TrafficCountPoints
+            BHAQpy.TrafficCountPoints object with ID's that match the modelled roads TCP ID attribute.
+        road_type : str
+                The traffic flow road type, as specified in EFT documentation. Options are Urban (Not London), Rural (Not London), Motorway (Not London), London - Central, London - Inner, London - Outer, London - Motorway
+        output_file : str, optional
+            Path to save csv file that could be copied directly into EFT. The default is None.
+        no_of_hours : int, optional
+            Operational hours of traffc. See EFT documentation. The default is 24.
+        flow_direction : TYPE, optional
+            Placeholder for now. The default is None.
+
+        Returns
+        -------
+        EFT_input_df : pandas.DataFrame
+            Dataframe of roads data formatted such that it can be directly imported into EFT.
+
+        """
+        
         # TODO: allow user to specify different road_types by matching series index to source ID
         # TODO: allow flow direction input
     
@@ -202,6 +359,41 @@ class ModelledRoads():
                      year, eit_output_path = None, headers_file = 'ADMS_template_v5.eit',
                      eft_output_path = None, traffic_format = 'Basic Split', 
                      pollutants = ['NOx', 'PM10', 'PM2.5'], eft_version = "11.0"):
+        """
+        Format drawn roads into EFT format. Run the EFT and save as an EIT.
+
+        Parameters
+        ----------
+        traffic_count_points : TrafficCountPoints
+            BHAQpy.TrafficCountPoints object with ID's that match the modelled roads TCP ID attribute.
+        eft_file_path : str
+            Path to an EFT spreadsheet. Download from https://laqm.defra.gov.uk/air-quality/air-quality-assessment/emissions-factors-toolkit/
+        road_type : str
+                The traffic flow road type, as specified in EFT documentation. Options are Urban (Not London), Rural (Not London), Motorway (Not London), London - Central, London - Inner, London - Outer, London - Motorway
+        area : str
+            Road area, as specified in EFT documentation. Options are England (Not London), London, Northern Ireland, Scotland and Wales.
+        year : int
+            Year to run EFT for.
+        eit_output_path : str, optional
+            Path to save eit file to. The default is None.
+        headers_file : str, optional
+            A path to a file containing ADMS headers for a eit file. These can be automatically generated within ADMS (see manual). The default is 'ADMS_template_v5.eit'.
+        eft_output_path : str, optional
+            Path of where to save our EFT spreadsheet once it has run. The default is None.
+        traffic_format : str, optional
+            Which traffic format to run in EFT. Options are Basic Split, Detailed Option 1, Detailed Option 2, Detailed Option 3 and Alternative Technologies. The default is 'Basic Split'.
+        pollutants : list, optional
+            Which polluants to run EFT for. The default is ['NOx', 'PM10', 'PM2.5'].
+        eft_version : str, optional
+            eft version that is being run. The default is "11.0".
+
+        Returns
+        -------
+        eft_data : pandas.DataFrame
+            The drawn roads formatted into eit format.
+
+        """
+        
         # TODO: add eft results to attributes
         
         #get_eft_data
@@ -217,6 +409,21 @@ class ModelledRoads():
         return eft_data
             
     def calculate_gradients(self, DTM_layers):
+        """
+        Calulate road gradient of drawn roads, based on defra digital terrain models (DTM)
+
+        Parameters
+        ----------
+        DTM_layers : str
+            Layer name of the digital terrain model to calculate gradients from.
+
+        Returns
+        -------
+        ModelledRoads
+            ModelledRoads object with gradients added into attributes.
+
+        """
+        
         if not type(DTM_layers) == list:
             raise Exception("DTM layer must be a list of layer names")
         

@@ -6,7 +6,6 @@ Created on Thu Mar 31 09:46:07 2022
 """
 
 import os
-from copy import deepcopy
 import numpy as np
 import pandas as pd
 from itertools import product
@@ -16,9 +15,7 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
     QgsMapLayerType,
-    QgsPathResolver,
     QgsRasterLayer,
-    QgsSimpleMarkerSymbolLayerBase,
     QgsSymbol,
     QgsWkbTypes,
     QgsRuleBasedRenderer,
@@ -39,7 +36,7 @@ import BHAQpy
 
 from BHAQpy.modelledroads import ModelledRoads
 
-from BHAQpy.utils import (select_layer_by_name,
+from BHAQpy._utils import (select_layer_by_name,
                            save_to_gpkg,
                            save_raster)
 
@@ -47,41 +44,118 @@ from BHAQpy.MyFeedback import MyFeedBack
 from BHAQpy.getdefrabackground import get_defra_background_concentrations
 
 class AQgisProjectBasemap():
-    def __init__(self, project_path, run_environment = "qgis_gui"):
-       self.project_path = project_path
-       
-       valid_run_envs = ['qgis_gui', 'standalone']
-       assert run_environment in valid_run_envs, f"run_environment must be one of: {', '.join(valid_run_envs)}"
-       
-       self.run_environment = run_environment
-       
-       if not os.path.exists(project_path):
-           raise Exception("Specified project path does not exist")
-       
-       #initialise project 
-       if run_environment == "qgis_gui":
-            project = QgsProject.instance()
-       elif run_environment == "standalone":
-           qgs = QgsApplication([], True)
-           qgs.initQgis()
-           
-           self.qgs_app = qgs
+    """
+    QGIS basemap object with all required basemap layers
+    
+    Attributes
+    ----------
+    project_path : str
+        The path to the project file
+    
+    run_environment : str
+        Either standalone or qgis_app. Standalone if running from a python script, 
+        qgis_app if running from qgis interface.
+    
+    qgs_app : 
+        The details of the QGIS process that is running
+    
+    project_name : str
+        The name of the project
+    
+    Methods
+    -------
+    
+    get_project()
+        returns the qgis project (see https://qgis.org/pyqgis/3.0/core/Project/QgsProject.html)
+        
+    initialise_project(project_name, project_path, site_geom_source, clip_distance = 10000)
+        create a new qgis project with clipped layers around a project site, saved to a single geopackage
+    
+    """
 
-           project = QgsProject.instance()
-           project.read(project_path)
-           
-           Processing.initialize()
-           qgs.processingRegistry().addProvider(QgsNativeAlgorithms())
-           
-       self._project = project
-       self.project_name = os.path.splitext(os.path.basename(project_path))[0]
-       return
+    def __init__(self, project_path, run_environment = "qgis_gui"):
+        """
+        
+
+        Parameters
+        ----------
+        project_path : str
+            The path to a qgis project.
+        run_environment : TYPE, optional
+            Either standalone or qgis_app. Standalone if running from a python script, 
+            qgis_app if running from qgis interface. The default is "qgis_gui".
+
+        Returns
+        -------
+        None.
+
+        """
+       
+        self.project_path = project_path
+        
+        valid_run_envs = ['qgis_gui', 'standalone']
+        assert run_environment in valid_run_envs, f"run_environment must be one of: {', '.join(valid_run_envs)}"
+        
+        self.run_environment = run_environment
+        
+        if not os.path.exists(project_path):
+            raise Exception("Specified project path does not exist")
+        
+        #initialise project 
+        if run_environment == "qgis_gui":
+             project = QgsProject.instance()
+        elif run_environment == "standalone":
+            qgs = QgsApplication([], True)
+            qgs.initQgis()
+            
+            self.qgs_app = qgs
+        
+            project = QgsProject.instance()
+            project.read(project_path)
+            
+            Processing.initialize()
+            qgs.processingRegistry().addProvider(QgsNativeAlgorithms())
+            
+        self._project = project
+        self.project_name = os.path.splitext(os.path.basename(project_path))[0]
+        return
    
     def get_project(self):
+        """
+        
+
+        Returns
+        -------
+        qgis.core.QgsProject
+            The qgis project (see https://qgis.org/pyqgis/3.0/core/Project/QgsProject.html).
+            From here the PyQGIS api can be used to edit and test the qgis project.
+
+        """
         return self._project
         
     def initialise_project(self, project_name, project_path, site_geom_source,
                            clip_distance = 10000):
+        """
+        
+
+        Parameters
+        ----------
+        project_name : str
+            Name of the project to be initialised.
+        project_path : str
+            The full project path for the project to be saved to.
+        site_geom_source : str
+            A path to a shapefile or layer name within the basemap project containing the site geometry.
+        clip_distance : int, optional
+            How far around the site to clip base layers. The default is 10000.
+
+        Returns
+        -------
+        new_ADMSQ_project : AQgisProject
+            A QGIS project with all clipped base layers and site geometry.
+
+        """
+        
         
         # set up paths
         # TODO: make paths absolute?
@@ -174,16 +248,125 @@ class AQgisProjectBasemap():
         new_ADMSQ_project.save()
         return new_ADMSQ_project
 #%%
-class AQgisProject(AQgisProjectBasemap):
+class AQgisProject(AQgisProjectBasemap): 
+    
+    """
+    Core class for an air quality QGIS project. Controls any functionality relating to a full project.
+    
+    Attributes
+    ----------
+    project_path : str
+        The path to the project file
+    
+    run_environment : str
+        Either standalone or qgis_app. Standalone if running from a python script, 
+        qgis_app if running from qgis interface.
+    
+    qgs_app : 
+        The details of the QGIS process that is running
+    
+    project_name : str
+        The name of the project
+    
+    gpkg_path : str
+        The path to the geopackage containing project layers
+    
+    modelled_roads_layer_name : str
+        The name of the layer within the project that represents the modelled roads to be imported into ADMS.
+    
+    Methods
+    -------
+    set_gpkg_path()
+        set the gpkg_path associated with the project, containing all project layers
+    
+    set_site_geom()
+        set the site geometry layer or file containing geometry for project
+    
+    get_site_background_concs()
+        get the defra modelled background concentration at the set_geom
+    
+    get_site_buffer()
+        create a buffer layer around site geom. TODO.
+    
+    add_construction_buffers()
+        TODO
+    
+    init_modelled_roads()
+        initialise a ModelledRoads object for the project. This is the QGIS version of roads to be imported into ADMS. 
+    
+    clip_layer_around_site()
+        clip a specified layer around site_geom
+    
+    add_monitoring_sites()
+        add monioting sites to project. TODO.
+        
+    generate_ASP()
+        Create an asp file based on points within QGIS project.
+    
+    save()
+        write QGIS project
+        
+    add_layer()
+        add a layer to the QGIS project
+        
+    remove_layer()
+        remove a layer from the QGIS project
+
+    """
     
     def __init__(self, project_path, run_environment = "qgis_gui"):
+        """
+        
+
+        Parameters
+        ----------
+        project_path : str
+            Full project path to the QGIS project file.
+        run_environment : str, optional
+            Either standalone or qgis_app. Standalone if running from a python script, 
+            qgis_app if running from qgis interface. The default is "qgis_gui". The default is "qgis_gui".
+
+        Returns
+        -------
+        None.
+
+        """
         super().__init__(project_path, run_environment)
     
     def set_gpkg_path(self, project_gpkg_path):
+        """
+        
+
+        Parameters
+        ----------
+        project_gpkg_path : str
+            
+        Set the path to the geopackage file associated with the project.
+
+        Returns
+        -------
+        None.
+
+        """
         self.gpkg_path = project_gpkg_path
         return
     
     def set_site_geom(self, site_geom_source):
+        """
+        
+
+        Parameters
+        ----------
+        site_geom_source : str
+            A path to a shapefile or layer name within the basemap project containing the geometry of a project site.
+            e.g. BuroHappold/Environment - 07 Air Quality/1. Projects/22/PROJECT NAME/4. GIS/Red Line Boundary.shp
+
+        Returns
+        -------
+        site_geometry : QgsVectorLayer
+            Vector layer containing the site geometry.
+
+        """
         #TODO check file exists
         
         if type(site_geom_source) != str:
@@ -205,6 +388,30 @@ class AQgisProject(AQgisProjectBasemap):
     def get_site_background_concs(self, background_region, year, 
                                   pollutants = ['no2', 'nox', 'pm10', 'pm25'],
                                   base_year = '2018', split_by_source=False):
+        """
+        Get defra background concentrations at the project site from https://uk-air.defra.gov.uk/data/laqm-background-maps?year=2018
+
+        Parameters
+        ----------
+        background_region : str
+            Background region as defined in defra background maps. 
+            Options: Greater_London, East_of_England, Midlands, Northern_England,
+            Northern_Ireland, Scotland, Southern_England, Wales.
+        year : int
+            The background year to get.
+        pollutants : list, optional
+            Pollutants to get background concentrations for. The default is ['no2', 'nox', 'pm10', 'pm25'].
+        base_year : int, optional
+            Base year of modelled background concentrations. The default is '2018'.
+        split_by_source : Bool, optional
+            Whether to split contributions of background concentrations into sources. The default is False.
+
+        Returns
+        -------
+        site_background_concs : pandas.DataFrame
+            Pandas dataframe with background concentrations for grid square(s) site falls within
+
+        """
         
         if 'site_geometry' not in dir(self):
             raise Exception('site_geometry not set. Set with set_site_geom function')
@@ -223,6 +430,28 @@ class AQgisProject(AQgisProjectBasemap):
         return site_background_concs
         
     def get_site_buffer(self, buffer_size, group="Construction"):
+        """
+        TODO
+
+        Parameters
+        ----------
+        buffer_size : TYPE
+            DESCRIPTION.
+        group : TYPE, optional
+            DESCRIPTION. The default is "Construction".
+
+        Raises
+        ------
+        Exception
+            DESCRIPTION.
+
+        Returns
+        -------
+        buffer_layer : TYPE
+            DESCRIPTION.
+
+        """
+        
         # TODO
         
         if 'site_geometry' not in dir(self):
@@ -281,6 +510,31 @@ class AQgisProject(AQgisProjectBasemap):
                             traffic_count_point_id_col_name = 'TCP ID', 
                             width_col_name = 'Width', speed_col_name = 'Speed', 
                             overwrite_gpkg_layer=False):
+        """
+        Initialise a modelled roads object in this project
+
+        Parameters
+        ----------
+        modelled_roads_layer_name : str, optional
+            The layer name of the existing modelled roads file. If None then a new layer is created. The default is None.
+        gpkg_write_path : str, optional
+            Path to geopackage at which modelled roads layer is saved. The default is self.geopackage_write_path, else 'modelled_roads.gpkg'.
+        traffic_count_point_id_col_name : str, optional
+            The attribute name representing the traffic count point ID. The default is 'TCP ID'.
+        width_col_name : str, optional
+            The attribute name representing the road width in m. The default is 'Width'.
+        speed_col_name : str, optional
+            The attribute name representing the traffic speed in kph. The default is 'Speed'.
+        overwrite_gpkg_layer : bool, optional
+            If geopackage layer exists already, should this be overwritten. The default is False.
+
+        Returns
+        -------
+        modelled_roads : BHAQpy.ModelledRoads
+            A ModelledRoads object. A number of functions can be carried out on.
+
+        """
+        
         
         self.modelled_roads_layer_name = modelled_roads_layer_name
         proj = self
@@ -302,6 +556,34 @@ class AQgisProject(AQgisProjectBasemap):
     def clip_layer_around_site(self, clip_layer, clip_layer_source,
                                gpkg_write_path, clip_bounding_box = None,
                                clip_distance = 10000):
+        """
+        clip a layer around site geometry for a specified distance
+
+        Parameters
+        ----------
+        clip_layer : str
+            Name of the layer within the project to clip.
+        clip_layer_source : str
+            Path to the file containing the layer to be clipped.
+        gpkg_write_path : str
+            The path to write the clipped laeyr to.
+        clip_bounding_box : list, optional
+            Specified x_min, x_max, y_min and y_max coordinates to clip to. If None then a bounding box is created using clip_distance. The default is None.
+        clip_distance : int, optional
+            The distance from the site geomoetery to clip layer to in metres. The default is 10000.
+
+        Raises
+        ------
+        Exception
+            DESCRIPTION.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        """
+        
         if 'site_geometry' not in dir(self):
             raise Exception('site_geometry not set. Set with set_site_geom function')
     
@@ -335,6 +617,25 @@ class AQgisProject(AQgisProjectBasemap):
             return False
     
     def add_monitoring_sites(self, monitoring_shp_files):
+        """
+        TODO
+
+        Parameters
+        ----------
+        monitoring_shp_files : TYPE
+            DESCRIPTION.
+
+        Raises
+        ------
+        Exception
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        
         # TODO: rethink this
         
         if 'gpkg_path' not in dir(self):
@@ -367,8 +668,9 @@ class AQgisProject(AQgisProjectBasemap):
         for shp_file in monitoring_shp_files:
             monitoring_layer_name =os.path.basename(shp_file).split(".")[0]
             monitoring_site_layer = QgsVectorLayer(shp_file, monitoring_layer_name, "ogr")
-            monitoring_site_layer_formatted = _format_monitoring_sites(monitoring_site_layer, rules)
-        
+            #monitoring_site_layer_formatted = _format_monitoring_sites(monitoring_site_layer, rules)
+            monitoring_site_layer_formatted = monitoring_site_layer
+            
             root = proj.layerTreeRoot()
             group = root.findGroup("Monitoring")
             monitoring_gpkg_layer = save_to_gpkg(monitoring_site_layer_formatted, gpkg_path)
@@ -382,6 +684,35 @@ class AQgisProject(AQgisProjectBasemap):
     def generate_ASP(self, asp_layer_name, output_file_path, id_attr_name = 'ID',
                      min_height_attr_name = 'Height', max_height_attr_name=None,
                      separation_distance_attr_name=None):
+        """
+        Create an asp file based on a layer within the project. 
+        Specified points are created at specified intervals (determined by value in separation_distance_attr_name) up to a specified maximum height (determined by value in max_height_attr_name).
+        If these parameters are None then specified points are only generated at value specified in the layers attribute specified in min_height_attr_name
+
+        Parameters
+        ----------
+        asp_layer_name : str
+            Layer within the project representing the asp specified points.
+        output_file_path : str
+            Path to the file at which asp file will be saved.
+        id_attr_name : str, optional
+            The layer attribute containing the ID/name of the specificed point. The default is 'ID'.
+        min_height_attr_name : str, optional
+            The layer attribute containing the minimum height of the specificed point. The default is 'Height'.
+        max_height_attr_name : str, optional
+            The layer attribute containing the maximum of the specificed points. 
+            If None then specifed points are noly created at value specified in min_height_attr_name. 
+            If not None then specified points are created at value specified in the layers attribute specified in min_height_attr_name
+            If  The default is None.
+        separation_distance_attr_name : str, optional
+            The layer attribute containing the height separation of the specificed points. The default is None.
+
+        Returns
+        -------
+        asp_df : pandas.DataFrame
+            Pandas dataframe containing all specified point ID, X, Y, Z.
+
+        """
         
         project = self.get_project()
         asp_layer = select_layer_by_name(asp_layer_name, project)
@@ -451,17 +782,54 @@ class AQgisProject(AQgisProjectBasemap):
         return asp_df
     
     def save(self):
+        """
+        write changes to a project
+
+        Returns
+        -------
+        None.
+
+        """
+        
         proj = self.get_project()
         proj.write()
         return
     
     def add_layer(self, layer):
+        """
+        Add a QGIS layer to a project
+
+        Parameters
+        ----------
+        layer : qgis.core.QgsVectorLayer
+            The pyqgis layer to add to a project.
+
+        Returns
+        -------
+        None.
+
+        """
+        
         proj = self.get_project()
         
         proj.addMapLayer(layer)
         return
     
     def remove_layer(self, layer):
+        """
+        Remove a QGIS layer from a project
+
+        Parameters
+        ----------
+        layer : qgis.core.QgsVectorLayer
+            The pyqgis layer to remove from a project.
+
+        Returns
+        -------
+        None.
+
+        """
+        
         proj = self.get_project()
         
         proj.removeMapLayer(layer)

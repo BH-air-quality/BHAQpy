@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar 30 11:38:49 2022
+Buro Happold Air Quality py.
+
+Seemlessly integrate python, QGIS and other air quality utilities.
 
 @author: kbenjamin
 """

@@ -1,8 +1,5 @@
 import pathlib
 
-import os
-
-
 from qgis.core import (
     QgsVectorLayer,
     QgsSimpleMarkerSymbolLayerBase,
@@ -19,6 +16,9 @@ from qgis.core import (
 from PyQt5.QtGui import QColor 
 
 class AQMonitoring():
+    """
+    TODO
+    """
     def __init__(self, source, x_col_name='X (m)', y_col_name='Y (m)', delim=',',
                  crs="epsg:27700"):
         

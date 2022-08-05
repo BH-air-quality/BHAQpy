@@ -7,20 +7,63 @@ Created on Wed Mar 30 11:29:05 2022
 
 import os
 import pandas as pd
-from .utils import (select_layer_by_name,
-                   attributes_table_df,
-                   write_ADMS_input_file)
+from ._utils import (select_layer_by_name,
+                   attributes_table_df)
 
 class TrafficCountPoints():
     '''
-    TODO: add read from file functionality
+    An object of traffic count points. These could be supplied from a transport consultant or from open sources such as DfT or LAEI.
+    The primary use of traffic cout points is to match them to a ModelledRoads object such that the traffic data is joined to the road geometry information.
+    
+    Attributes
+    ----------
+    source : str
+        The data source of the traffic count points dataset
+    
+    project : BHAQpy.AQgisProject
+        The AQgisProject object in which the TCP layer is within
+        
+    layer : qgis.core.QGSVectorLayer
+        The QGIS vector layer with the traffic count points data.
+        
+    Methods
+    -------
+    get_attributes_df()
+        get a pandas dataframe with traffic count point data.
     '''
     
     def __init__(self, source, tcp_id_col_name = 'ID', 
                  total_AADT_col_name = 'Tot_AADT19', HDV_percentage_col_name = 'HDV %',
                  HDV_AADT_col_name = 'HDV AADT', speed_col_name = 'Sp_kph',
                  project = None):
+        """
         
+
+        Parameters
+        ----------
+        source : str
+            Source of data. A layer name within a project or a csv file.
+        tcp_id_col_name : str, optional
+            The attribute name storing the ID of the count point. The default is 'ID'.
+        total_AADT_col_name : TYPE, optional
+            The attribute name storing the total AADT of the count point. The default is 'Tot_AADT19'.
+        HDV_percentage_col_name : TYPE, optional
+            The attribute name storing the HD percentage of the count point. The default is 'HDV %'.
+        HDV_AADT_col_name : TYPE, optional
+            The attribute name storing the HDV AADT of the count point. The default is 'HDV AADT'.
+        speed_col_name : TYPE, optional
+            The attribute name storing the speed of the count point in kph. The default is 'Sp_kph'.
+        project : TYPE, optional
+            BHAQpy.AQgisProject in which the layer is within. The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
+        
+       
+        # TODO: add read from file functionality
         # TODO: get XY coordinates
         self.source = source
         self.project = project
@@ -94,5 +137,14 @@ class TrafficCountPoints():
         return
     
     def get_attributes_df(self):
+        """
+        Get the attributes table as a dataframe
+
+        Returns
+        -------
+        pandas.DataFrame
+            Dataframe of attributes table.
+
+        """
         
         return self._attr_df
