@@ -45,6 +45,7 @@
     </ul>
 
 
+            <footer>Buro Happold Air Quality Python</footer>
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev" target="_blank">
             built with <span class="visually-hidden">pdoc</span><img
@@ -76,7 +77,7 @@
 </span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a>
 </span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="kn">import</span> <span class="nn">os</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">select_layer_by_name</span><span class="p">,</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="kn">from</span> <span class="nn">._utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">select_layer_by_name</span><span class="p">,</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>                   <span class="n">attributes_table_df</span><span class="p">)</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a>
 </span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="k">class</span> <span class="nc">TrafficCountPoints</span><span class="p">():</span>
@@ -376,18 +377,18 @@
             <div class="docstring"><p>An object of traffic count points. These could be supplied from a transport consultant or from open sources such as DfT or LAEI.
 The primary use of traffic cout points is to match them to a ModelledRoads object such that the traffic data is joined to the road geometry information.</p>
 
-<h2 id="attributes">Attributes</h2>
+<h6 id="attributes">Attributes</h6>
 
-<p>source : str
-    The data source of the traffic count points dataset</p>
+<ul>
+<li><strong>source</strong> (str):
+The data source of the traffic count points dataset</li>
+<li><strong>project</strong> (BHAQpy.AQgisProject):
+The AQgisProject object in which the TCP layer is within</li>
+<li><strong>layer</strong> (qgis.core.QGSVectorLayer):
+The QGIS vector layer with the traffic count points data.</li>
+</ul>
 
-<p>project : BHAQpy.AQgisProject
-    The AQgisProject object in which the TCP layer is within</p>
-
-<p>layer : qgis.core.QGSVectorLayer
-    The QGIS vector layer with the traffic count points data.</p>
-
-<h2 id="methods">Methods</h2>
+<h6 id="methods">Methods</h6>
 
 <p>get_attributes_df()
     get a pandas dataframe with traffic count point data.</p>
@@ -510,26 +511,30 @@ The primary use of traffic cout points is to match them to a ModelledRoads objec
 </span></pre></div>
 
 
-            <div class="docstring"><h2 id="parameters">Parameters</h2>
+            <div class="docstring"><h6 id="parameters">Parameters</h6>
 
-<p>source : str
-    Source of data. A layer name within a project or a csv file.
-tcp_id_col_name : str, optional
-    The attribute name storing the ID of the count point. The default is 'ID'.
-total_AADT_col_name : TYPE, optional
-    The attribute name storing the total AADT of the count point. The default is 'Tot_AADT19'.
-HDV_percentage_col_name : TYPE, optional
-    The attribute name storing the HD percentage of the count point. The default is 'HDV %'.
-HDV_AADT_col_name : TYPE, optional
-    The attribute name storing the HDV AADT of the count point. The default is 'HDV AADT'.
-speed_col_name : TYPE, optional
-    The attribute name storing the speed of the count point in kph. The default is 'Sp_kph'.
-project : TYPE, optional
-    BHAQpy.AQgisProject in which the layer is within. The default is None.</p>
+<ul>
+<li><strong>source</strong> (str):
+Source of data. A layer name within a project or a csv file.</li>
+<li><strong>tcp_id_col_name</strong> (str, optional):
+The attribute name storing the ID of the count point. The default is 'ID'.</li>
+<li><strong>total_AADT_col_name</strong> (TYPE, optional):
+The attribute name storing the total AADT of the count point. The default is 'Tot_AADT19'.</li>
+<li><strong>HDV_percentage_col_name</strong> (TYPE, optional):
+The attribute name storing the HD percentage of the count point. The default is 'HDV %'.</li>
+<li><strong>HDV_AADT_col_name</strong> (TYPE, optional):
+The attribute name storing the HDV AADT of the count point. The default is 'HDV AADT'.</li>
+<li><strong>speed_col_name</strong> (TYPE, optional):
+The attribute name storing the speed of the count point in kph. The default is 'Sp_kph'.</li>
+<li><strong>project</strong> (TYPE, optional):
+BHAQpy.AQgisProject in which the layer is within. The default is None.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>None.</p>
+<ul>
+<li><strong>None.</strong></li>
+</ul>
 </div>
 
 
@@ -562,10 +567,11 @@ project : TYPE, optional
 
             <div class="docstring"><p>Get the attributes table as a dataframe</p>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>pandas.DataFrame
-    Dataframe of attributes table.</p>
+<ul>
+<li><strong>pandas.DataFrame</strong>: Dataframe of attributes table.</li>
+</ul>
 </div>
 
 

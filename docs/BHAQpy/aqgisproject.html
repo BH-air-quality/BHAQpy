@@ -93,6 +93,7 @@
     </ul>
 
 
+            <footer>Buro Happold Air Quality Python</footer>
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev" target="_blank">
             built with <span class="visually-hidden">pdoc</span><img
@@ -153,11 +154,11 @@
 </span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a>
 </span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="kn">from</span> <span class="nn">BHAQpy.modelledroads</span> <span class="kn">import</span> <span class="n">ModelledRoads</span>
 </span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>
-</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="kn">from</span> <span class="nn">BHAQpy.utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">select_layer_by_name</span><span class="p">,</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="kn">from</span> <span class="nn">BHAQpy._utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">select_layer_by_name</span><span class="p">,</span>
 </span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a>                           <span class="n">save_to_gpkg</span><span class="p">,</span>
 </span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a>                           <span class="n">save_raster</span><span class="p">)</span>
 </span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>
-</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="kn">from</span> <span class="nn">BHAQpy.MyFeedback</span> <span class="kn">import</span> <span class="n">MyFeedBack</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="kn">from</span> <span class="nn">BHAQpy._MyFeedback</span> <span class="kn">import</span> <span class="n">MyFeedBack</span>
 </span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="kn">from</span> <span class="nn">BHAQpy.getdefrabackground</span> <span class="kn">import</span> <span class="n">get_defra_background_concentrations</span>
 </span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>
 </span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="k">class</span> <span class="nc">AQgisProjectBasemap</span><span class="p">():</span>
@@ -1282,22 +1283,21 @@
 
             <div class="docstring"><p>QGIS basemap object with all required basemap layers</p>
 
-<h2 id="attributes">Attributes</h2>
+<h6 id="attributes">Attributes</h6>
 
-<p>project_path : str
-    The path to the project file</p>
+<ul>
+<li><strong>project_path</strong> (str):
+The path to the project file</li>
+<li><strong>run_environment</strong> (str):
+Either standalone or qgis_app. Standalone if running from a python script, 
+qgis_app if running from qgis interface.</li>
+<li><strong>qgs_app</strong> ():
+The details of the QGIS process that is running</li>
+<li><strong>project_name</strong> (str):
+The name of the project</li>
+</ul>
 
-<p>run_environment : str
-    Either standalone or qgis_app. Standalone if running from a python script, 
-    qgis_app if running from qgis interface.</p>
-
-<p>qgs_app : 
-    The details of the QGIS process that is running</p>
-
-<p>project_name : str
-    The name of the project</p>
-
-<h2 id="methods">Methods</h2>
+<h6 id="methods">Methods</h6>
 
 <p>get_project()
     returns the qgis project (see <a href="https://qgis.org/pyqgis/3.0/core/Project/QgsProject.html">https://qgis.org/pyqgis/3.0/core/Project/QgsProject.html</a>)</p>
@@ -1366,17 +1366,21 @@
 </span></pre></div>
 
 
-            <div class="docstring"><h2 id="parameters">Parameters</h2>
+            <div class="docstring"><h6 id="parameters">Parameters</h6>
 
-<p>project_path : str
-    The path to a qgis project.
-run_environment : TYPE, optional
-    Either standalone or qgis_app. Standalone if running from a python script, 
-    qgis_app if running from qgis interface. The default is "qgis_gui".</p>
+<ul>
+<li><strong>project_path</strong> (str):
+The path to a qgis project.</li>
+<li><strong>run_environment</strong> (TYPE, optional):
+Either standalone or qgis_app. Standalone if running from a python script, 
+qgis_app if running from qgis interface. The default is "qgis_gui".</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>None.</p>
+<ul>
+<li><strong>None.</strong></li>
+</ul>
 </div>
 
 
@@ -1407,11 +1411,12 @@ run_environment : TYPE, optional
 </span></pre></div>
 
 
-            <div class="docstring"><h2 id="returns">Returns</h2>
+            <div class="docstring"><h6 id="returns">Returns</h6>
 
-<p>qgis.core.QgsProject
-    The qgis project (see https://qgis.org/pyqgis/3.0/core/Project/QgsProject.html).
-    From here the PyQGIS api can be used to edit and test the qgis project.</p>
+<ul>
+<li><strong>qgis.core.QgsProject</strong>: The qgis project (see https://qgis.org/pyqgis/3.0/core/Project/QgsProject.html).
+From here the PyQGIS api can be used to edit and test the qgis project.</li>
+</ul>
 </div>
 
 
@@ -1544,21 +1549,25 @@ run_environment : TYPE, optional
 </span></pre></div>
 
 
-            <div class="docstring"><h2 id="parameters">Parameters</h2>
+            <div class="docstring"><h6 id="parameters">Parameters</h6>
 
-<p>project_name : str
-    Name of the project to be initialised.
-project_path : str
-    The full project path for the project to be saved to.
-site_geom_source : str
-    A path to a shapefile or layer name within the basemap project containing the site geometry.
-clip_distance : int, optional
-    How far around the site to clip base layers. The default is 10000.</p>
+<ul>
+<li><strong>project_name</strong> (str):
+Name of the project to be initialised.</li>
+<li><strong>project_path</strong> (str):
+The full project path for the project to be saved to.</li>
+<li><strong>site_geom_source</strong> (str):
+A path to a shapefile or layer name within the basemap project containing the site geometry.</li>
+<li><strong>clip_distance</strong> (int, optional):
+How far around the site to clip base layers. The default is 10000.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>new_ADMSQ_project : AQgisProject
-    A QGIS project with all clipped base layers and site geometry.</p>
+<ul>
+<li><strong>new_ADMSQ_project</strong> (AQgisProject):
+A QGIS project with all clipped base layers and site geometry.</li>
+</ul>
 </div>
 
 
@@ -2166,28 +2175,25 @@ clip_distance : int, optional
 
             <div class="docstring"><p>Core class for an air quality QGIS project. Controls any functionality relating to a full project.</p>
 
-<h2 id="attributes">Attributes</h2>
+<h6 id="attributes">Attributes</h6>
 
-<p>project_path : str
-    The path to the project file</p>
+<ul>
+<li><strong>project_path</strong> (str):
+The path to the project file</li>
+<li><strong>run_environment</strong> (str):
+Either standalone or qgis_app. Standalone if running from a python script, 
+qgis_app if running from qgis interface.</li>
+<li><strong>qgs_app</strong> ():
+The details of the QGIS process that is running</li>
+<li><strong>project_name</strong> (str):
+The name of the project</li>
+<li><strong>gpkg_path</strong> (str):
+The path to the geopackage containing project layers</li>
+<li><strong>modelled_roads_layer_name</strong> (str):
+The name of the layer within the project that represents the modelled roads to be imported into ADMS.</li>
+</ul>
 
-<p>run_environment : str
-    Either standalone or qgis_app. Standalone if running from a python script, 
-    qgis_app if running from qgis interface.</p>
-
-<p>qgs_app : 
-    The details of the QGIS process that is running</p>
-
-<p>project_name : str
-    The name of the project</p>
-
-<p>gpkg_path : str
-    The path to the geopackage containing project layers</p>
-
-<p>modelled_roads_layer_name : str
-    The name of the layer within the project that represents the modelled roads to be imported into ADMS.</p>
-
-<h2 id="methods">Methods</h2>
+<h6 id="methods">Methods</h6>
 
 <p>set_gpkg_path()
     set the gpkg_path associated with the project, containing all project layers</p>
@@ -2258,17 +2264,21 @@ clip_distance : int, optional
 </span></pre></div>
 
 
-            <div class="docstring"><h2 id="parameters">Parameters</h2>
+            <div class="docstring"><h6 id="parameters">Parameters</h6>
 
-<p>project_path : str
-    Full project path to the QGIS project file.
-run_environment : str, optional
-    Either standalone or qgis_app. Standalone if running from a python script, 
-    qgis_app if running from qgis interface. The default is "qgis_gui". The default is "qgis_gui".</p>
+<ul>
+<li><strong>project_path</strong> (str):
+Full project path to the QGIS project file.</li>
+<li><strong>run_environment</strong> (str, optional):
+Either standalone or qgis_app. Standalone if running from a python script, 
+qgis_app if running from qgis interface. The default is "qgis_gui". The default is "qgis_gui".</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>None.</p>
+<ul>
+<li><strong>None.</strong></li>
+</ul>
 </div>
 
 
@@ -2304,15 +2314,18 @@ run_environment : str, optional
 </span></pre></div>
 
 
-            <div class="docstring"><h2 id="parameters">Parameters</h2>
+            <div class="docstring"><h6 id="parameters">Parameters</h6>
 
-<p>project_gpkg_path : str</p>
+<ul>
+<li><p><strong>project_gpkg_path</strong> (str):</p></li>
+<li><p><strong>Set the path to the geopackage file associated with the project.</strong></p></li>
+</ul>
 
-<p>Set the path to the geopackage file associated with the project.</p>
+<h6 id="returns">Returns</h6>
 
-<h2 id="returns">Returns</h2>
-
-<p>None.</p>
+<ul>
+<li><strong>None.</strong></li>
+</ul>
 </div>
 
 
@@ -2364,16 +2377,20 @@ run_environment : str, optional
 </span></pre></div>
 
 
-            <div class="docstring"><h2 id="parameters">Parameters</h2>
+            <div class="docstring"><h6 id="parameters">Parameters</h6>
 
-<p>site_geom_source : str
-    A path to a shapefile or layer name within the basemap project containing the geometry of a project site.
-    e.g. BuroHappold/Environment - 07 Air Quality/1. Projects/22/PROJECT NAME/4. GIS/Red Line Boundary.shp</p>
+<ul>
+<li><strong>site_geom_source</strong> (str):
+A path to a shapefile or layer name within the basemap project containing the geometry of a project site.
+e.g. BuroHappold/Environment - 07 Air Quality/1. Projects/22/PROJECT NAME/4. GIS/Red Line Boundary.shp</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>site_geometry : QgsVectorLayer
-    Vector layer containing the site geometry.</p>
+<ul>
+<li><strong>site_geometry</strong> (QgsVectorLayer):
+Vector layer containing the site geometry.</li>
+</ul>
 </div>
 
 
@@ -2437,25 +2454,29 @@ run_environment : str, optional
 
             <div class="docstring"><p>Get defra background concentrations at the project site from <a href="https://uk-air.defra.gov.uk/data/laqm-background-maps?year=2018">https://uk-air.defra.gov.uk/data/laqm-background-maps?year=2018</a></p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>background_region : str
-    Background region as defined in defra background maps. 
-    Options: Greater_London, East_of_England, Midlands, Northern_England,
-    Northern_Ireland, Scotland, Southern_England, Wales.
-year : int
-    The background year to get.
-pollutants : list, optional
-    Pollutants to get background concentrations for. The default is ['no2', 'nox', 'pm10', 'pm25'].
-base_year : int, optional
-    Base year of modelled background concentrations. The default is '2018'.
-split_by_source : Bool, optional
-    Whether to split contributions of background concentrations into sources. The default is False.</p>
+<ul>
+<li><strong>background_region</strong> (str):
+Background region as defined in defra background maps. 
+Options: Greater_London, East_of_England, Midlands, Northern_England,
+Northern_Ireland, Scotland, Southern_England, Wales.</li>
+<li><strong>year</strong> (int):
+The background year to get.</li>
+<li><strong>pollutants</strong> (list, optional):
+Pollutants to get background concentrations for. The default is ['no2', 'nox', 'pm10', 'pm25'].</li>
+<li><strong>base_year</strong> (int, optional):
+Base year of modelled background concentrations. The default is '2018'.</li>
+<li><strong>split_by_source</strong> (Bool, optional):
+Whether to split contributions of background concentrations into sources. The default is False.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>site_background_concs : pandas.DataFrame
-    Pandas dataframe with background concentrations for grid square(s) site falls within</p>
+<ul>
+<li><strong>site_background_concs</strong> (pandas.DataFrame):
+Pandas dataframe with background concentrations for grid square(s) site falls within</li>
+</ul>
 </div>
 
 
@@ -2548,22 +2569,27 @@ split_by_source : Bool, optional
 
             <div class="docstring"><p>TODO</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>buffer_size : TYPE
-    DESCRIPTION.
-group : TYPE, optional
-    DESCRIPTION. The default is "Construction".</p>
+<ul>
+<li><strong>buffer_size</strong> (TYPE):
+DESCRIPTION.</li>
+<li><strong>group</strong> (TYPE, optional):
+DESCRIPTION. The default is "Construction".</li>
+</ul>
 
-<h2 id="raises">Raises</h2>
+<h6 id="raises">Raises</h6>
 
-<p>Exception
-    DESCRIPTION.</p>
+<ul>
+<li><strong>Exception</strong>: DESCRIPTION.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>buffer_layer : TYPE
-    DESCRIPTION.</p>
+<ul>
+<li><strong>buffer_layer</strong> (TYPE):
+DESCRIPTION.</li>
+</ul>
 </div>
 
 
@@ -2650,25 +2676,29 @@ group : TYPE, optional
 
             <div class="docstring"><p>Initialise a modelled roads object in this project</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>modelled_roads_layer_name : str, optional
-    The layer name of the existing modelled roads file. If None then a new layer is created. The default is None.
-gpkg_write_path : str, optional
-    Path to geopackage at which modelled roads layer is saved. The default is self.geopackage_write_path, else 'modelled_roads.gpkg'.
-traffic_count_point_id_col_name : str, optional
-    The attribute name representing the traffic count point ID. The default is 'TCP ID'.
-width_col_name : str, optional
-    The attribute name representing the road width in m. The default is 'Width'.
-speed_col_name : str, optional
-    The attribute name representing the traffic speed in kph. The default is 'Speed'.
-overwrite_gpkg_layer : bool, optional
-    If geopackage layer exists already, should this be overwritten. The default is False.</p>
+<ul>
+<li><strong>modelled_roads_layer_name</strong> (str, optional):
+The layer name of the existing modelled roads file. If None then a new layer is created. The default is None.</li>
+<li><strong>gpkg_write_path</strong> (str, optional):
+Path to geopackage at which modelled roads layer is saved. The default is self.geopackage_write_path, else 'modelled_roads.gpkg'.</li>
+<li><strong>traffic_count_point_id_col_name</strong> (str, optional):
+The attribute name representing the traffic count point ID. The default is 'TCP ID'.</li>
+<li><strong>width_col_name</strong> (str, optional):
+The attribute name representing the road width in m. The default is 'Width'.</li>
+<li><strong>speed_col_name</strong> (str, optional):
+The attribute name representing the traffic speed in kph. The default is 'Speed'.</li>
+<li><strong>overwrite_gpkg_layer</strong> (bool, optional):
+If geopackage layer exists already, should this be overwritten. The default is False.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>modelled_roads : BHAQpy.ModelledRoads
-    A ModelledRoads object. A number of functions can be carried out on.</p>
+<ul>
+<li><strong>modelled_roads</strong> (BHAQpy.ModelledRoads):
+A ModelledRoads object. A number of functions can be carried out on.</li>
+</ul>
 </div>
 
 
@@ -2751,28 +2781,32 @@ overwrite_gpkg_layer : bool, optional
 
             <div class="docstring"><p>clip a layer around site geometry for a specified distance</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>clip_layer : str
-    Name of the layer within the project to clip.
-clip_layer_source : str
-    Path to the file containing the layer to be clipped.
-gpkg_write_path : str
-    The path to write the clipped laeyr to.
-clip_bounding_box : list, optional
-    Specified x_min, x_max, y_min and y_max coordinates to clip to. If None then a bounding box is created using clip_distance. The default is None.
-clip_distance : int, optional
-    The distance from the site geomoetery to clip layer to in metres. The default is 10000.</p>
+<ul>
+<li><strong>clip_layer</strong> (str):
+Name of the layer within the project to clip.</li>
+<li><strong>clip_layer_source</strong> (str):
+Path to the file containing the layer to be clipped.</li>
+<li><strong>gpkg_write_path</strong> (str):
+The path to write the clipped laeyr to.</li>
+<li><strong>clip_bounding_box</strong> (list, optional):
+Specified x_min, x_max, y_min and y_max coordinates to clip to. If None then a bounding box is created using clip_distance. The default is None.</li>
+<li><strong>clip_distance</strong> (int, optional):
+The distance from the site geomoetery to clip layer to in metres. The default is 10000.</li>
+</ul>
 
-<h2 id="raises">Raises</h2>
+<h6 id="raises">Raises</h6>
 
-<p>Exception
-    DESCRIPTION.</p>
+<ul>
+<li><strong>Exception</strong>: DESCRIPTION.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>TYPE
-    DESCRIPTION.</p>
+<ul>
+<li><strong>TYPE</strong>: DESCRIPTION.</li>
+</ul>
 </div>
 
 
@@ -2857,19 +2891,24 @@ clip_distance : int, optional
 
             <div class="docstring"><p>TODO</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>monitoring_shp_files : TYPE
-    DESCRIPTION.</p>
+<ul>
+<li><strong>monitoring_shp_files</strong> (TYPE):
+DESCRIPTION.</li>
+</ul>
 
-<h2 id="raises">Raises</h2>
+<h6 id="raises">Raises</h6>
 
-<p>Exception
-    DESCRIPTION.</p>
+<ul>
+<li><strong>Exception</strong>: DESCRIPTION.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>None.</p>
+<ul>
+<li><strong>None.</strong></li>
+</ul>
 </div>
 
 
@@ -2991,28 +3030,32 @@ clip_distance : int, optional
 Specified points are created at specified intervals (determined by value in separation_distance_attr_name) up to a specified maximum height (determined by value in max_height_attr_name).
 If these parameters are None then specified points are only generated at value specified in the layers attribute specified in min_height_attr_name</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>asp_layer_name : str
-    Layer within the project representing the asp specified points.
-output_file_path : str
-    Path to the file at which asp file will be saved.
-id_attr_name : str, optional
-    The layer attribute containing the ID/name of the specificed point. The default is 'ID'.
-min_height_attr_name : str, optional
-    The layer attribute containing the minimum height of the specificed point. The default is 'Height'.
-max_height_attr_name : str, optional
-    The layer attribute containing the maximum of the specificed points. 
-    If None then specifed points are noly created at value specified in min_height_attr_name. 
-    If not None then specified points are created at value specified in the layers attribute specified in min_height_attr_name
-    If  The default is None.
-separation_distance_attr_name : str, optional
-    The layer attribute containing the height separation of the specificed points. The default is None.</p>
+<ul>
+<li><strong>asp_layer_name</strong> (str):
+Layer within the project representing the asp specified points.</li>
+<li><strong>output_file_path</strong> (str):
+Path to the file at which asp file will be saved.</li>
+<li><strong>id_attr_name</strong> (str, optional):
+The layer attribute containing the ID/name of the specificed point. The default is 'ID'.</li>
+<li><strong>min_height_attr_name</strong> (str, optional):
+The layer attribute containing the minimum height of the specificed point. The default is 'Height'.</li>
+<li><strong>max_height_attr_name</strong> (str, optional):
+The layer attribute containing the maximum of the specificed points. 
+If None then specifed points are noly created at value specified in min_height_attr_name. 
+If not None then specified points are created at value specified in the layers attribute specified in min_height_attr_name
+If  The default is None.</li>
+<li><strong>separation_distance_attr_name</strong> (str, optional):
+The layer attribute containing the height separation of the specificed points. The default is None.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>asp_df : pandas.DataFrame
-    Pandas dataframe containing all specified point ID, X, Y, Z.</p>
+<ul>
+<li><strong>asp_df</strong> (pandas.DataFrame):
+Pandas dataframe containing all specified point ID, X, Y, Z.</li>
+</ul>
 </div>
 
 
@@ -3046,9 +3089,11 @@ separation_distance_attr_name : str, optional
 
             <div class="docstring"><p>write changes to a project</p>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>None.</p>
+<ul>
+<li><strong>None.</strong></li>
+</ul>
 </div>
 
 
@@ -3088,14 +3133,18 @@ separation_distance_attr_name : str, optional
 
             <div class="docstring"><p>Add a QGIS layer to a project</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>layer : qgis.core.QgsVectorLayer
-    The pyqgis layer to add to a project.</p>
+<ul>
+<li><strong>layer</strong> (qgis.core.QgsVectorLayer):
+The pyqgis layer to add to a project.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>None.</p>
+<ul>
+<li><strong>None.</strong></li>
+</ul>
 </div>
 
 
@@ -3135,14 +3184,18 @@ separation_distance_attr_name : str, optional
 
             <div class="docstring"><p>Remove a QGIS layer from a project</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>layer : qgis.core.QgsVectorLayer
-    The pyqgis layer to remove from a project.</p>
+<ul>
+<li><strong>layer</strong> (qgis.core.QgsVectorLayer):
+The pyqgis layer to remove from a project.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>None.</p>
+<ul>
+<li><strong>None.</strong></li>
+</ul>
 </div>
 
 

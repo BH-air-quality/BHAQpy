@@ -36,6 +36,7 @@
     </ul>
 
 
+            <footer>Buro Happold Air Quality Python</footer>
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev" target="_blank">
             built with <span class="visually-hidden">pdoc</span><img
@@ -291,27 +292,31 @@
 
             <div class="docstring"><p>Get defra modelled background concentrations at specified coordinates.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>coordinates : list
-    List of coordinates representing a singular point or a maximum and minimum extent. Must be in epsg:27700 crs. e.g. [5000, 7000] or [[50000, 70000], [51000, 71000]]
-background_region : str
-    Background region as defined in defra background maps. Options: Greater_London, East_of_England, Midlands, Northern_England, Northern_Ireland, Scotland, Southern_England, Wales.
-year : int
-    DESCRIPTION.
-year : int
-    The background year to get.
-pollutants : list, optional
-    Pollutants to get background concentrations for. The default is ['no2', 'nox', 'pm10', 'pm25'].
-base_year : int, optional
-    Base year of modelled background concentrations. The default is '2018'.
-split_by_source : Bool, optional
-    Whether to split contributions of background concentrations into sources. The default is False.</p>
+<ul>
+<li><strong>coordinates</strong> (list):
+List of coordinates representing a singular point or a maximum and minimum extent. Must be in epsg:27700 crs. e.g. [5000, 7000] or [[50000, 70000], [51000, 71000]]</li>
+<li><strong>background_region</strong> (str):
+Background region as defined in defra background maps. Options: Greater_London, East_of_England, Midlands, Northern_England, Northern_Ireland, Scotland, Southern_England, Wales.</li>
+<li><strong>year</strong> (int):
+DESCRIPTION.</li>
+<li><strong>year</strong> (int):
+The background year to get.</li>
+<li><strong>pollutants</strong> (list, optional):
+Pollutants to get background concentrations for. The default is ['no2', 'nox', 'pm10', 'pm25'].</li>
+<li><strong>base_year</strong> (int, optional):
+Base year of modelled background concentrations. The default is '2018'.</li>
+<li><strong>split_by_source</strong> (Bool, optional):
+Whether to split contributions of background concentrations into sources. The default is False.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>background_concentrations : pandas.DataFrame
-    Dataframe of background concentrations at grid square(s) coordinates are within.</p>
+<ul>
+<li><strong>background_concentrations</strong> (pandas.DataFrame):
+Dataframe of background concentrations at grid square(s) coordinates are within.</li>
+</ul>
 </div>
 
 
