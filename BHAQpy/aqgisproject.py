@@ -40,7 +40,7 @@ from BHAQpy._utils import (select_layer_by_name,
                            save_to_gpkg,
                            save_raster)
 
-from BHAQpy.MyFeedback import MyFeedBack
+from BHAQpy._MyFeedback import MyFeedBack
 from BHAQpy.getdefrabackground import get_defra_background_concentrations
 
 class AQgisProjectBasemap():
