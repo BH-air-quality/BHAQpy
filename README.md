@@ -2,6 +2,10 @@
 
 Seamless integration of technical air quality work into python
 
+## Documentation
+
+See the full documentation [here](https://bh-air-quality.github.io/BHAQpy/BHAQpy.html).
+
 ## Installation
 
 First make sure you have git installed via you anaconda prompt
