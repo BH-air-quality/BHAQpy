@@ -169,6 +169,7 @@ class ModelledRoads():
             A pandas dataframe with all attributes and values of modelled roads.
 
         """
+        self._attr_df = attributes_table_df(self.layer)
         
         return self._attr_df
     
