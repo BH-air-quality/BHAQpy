@@ -29,19 +29,17 @@ project_dir = 'GIS'
 proj = BHAQpy.AQgisProject(os.path.join(project_dir, project_name+'.qgz'), run_environment)
 #%%
 # create a blank modelled roads layer 
-# =============================================================================
-# modelled_roads = proj.init_modelled_roads(gpkg_write_path='GIS/BHAQpy_example.gpkg',
-#                                           overwrite_gpkg_layer=True)
-# proj.add_layer(modelled_roads.layer)
-# proj.save()
-# =============================================================================
+modelled_roads = proj.init_modelled_roads(gpkg_write_path='GIS/BHAQpy_example.gpkg',
+                                          overwrite_gpkg_layer=True)
+proj.add_layer(modelled_roads.layer)
+proj.save()
 #%%
 # now go into qgis and draw dome roads!
 #%%
 # if you want to use an exiting modelled roads layer (this will write to a new layer within a geopackage)
 modelled_roads = BHAQpy.ModelledRoads(proj, source = 'modelled roads', 
                                gpkg_write_path='GIS/BHAQpy_example.gpkg',
-                               gpkg_layer_name='Modelled Roads V2', 
+                               gpkg_layer_name='Modelled Roads ouput', 
                                overwrite_gpkg_layer=True)
 
 #%%
@@ -52,14 +50,11 @@ print(road_attributes)
 # calculate the road gradients. First we must load in the digital terrain model (DTM)
 # this can be downloaded from https://environment.data.gov.uk/DefraDataDownload/?Mode=survey
 DTM_layer_name = "Defra Lidar DTM"
-# =============================================================================
-
-# DTM_layer = QgsRasterLayer(os.path.join('GIS', 'LIDAR-DTM-1m-2020-TQ38nw', 'TQ38nw_DTM_1m.tif'), 
-#                           DTM_layer_name)
-# proj.add_layer(DTM_layer)
-# proj.save()
-# =============================================================================
-
+DTM_layer = QgsRasterLayer(os.path.join('GIS', 'LIDAR-DTM-1m-2020-TQ38nw', 'TQ38nw_DTM_1m.tif'), 
+                          DTM_layer_name)
+proj.add_layer(DTM_layer)
+proj.save()
+#%%
 modelled_roads_gradients = modelled_roads.calculate_gradients([DTM_layer_name])
 road_attributes_grads = modelled_roads_gradients.get_attributes_df()
 print(road_attributes_grads)
@@ -86,20 +81,24 @@ print(tcps.get_attributes_df())
 # details of a road
 modelled_roads_tcps = modelled_roads_gradients.match_to_TCP(tcps)
 print(modelled_roads_tcps)
-#%% generate an EFT - this will attempt t run an excel macro. You will need to 
-# open the EFT excel file and 'enable content'
-eft_file_path = 'EFT/EFT2021_v11p0.xlsb'
-road_type = 'London - Inner'
-area = 'London'
-year = '2019'
-eit_output_path = 'Output/BHAQpy_example.eit'
-headers_file = os.path.join(template_dir, 'ADMS_template_v5.eit')
-eft_output_path = 'Outut/BHAQp_example_EFT.xlsb'
-eit = modelled_roads_gradients.generate_EIT(tcps, eft_file_path, road_type, area, 
-                                         year, eit_output_path, headers_file,
-                                         eft_output_path)
+#%% generate an EFT 
+
+# this will attempt t run an excel macro. You will need to  open the EFT excel file and 'enable content'
+# =============================================================================
+# eft_file_path = 'EFT/EFT2021_v11p0.xlsb'
+# road_type = 'London - Inner'
+# area = 'London'
+# year = '2019'
+# eit_output_path = 'Output/BHAQpy_example.eit'
+# headers_file = os.path.join(template_dir, 'ADMS_template_v5.eit')
+# eft_output_path = 'Outut/BHAQp_example_EFT.xlsb'
+# eit = modelled_roads_gradients.generate_EIT(tcps, eft_file_path, road_type, area, 
+#                                          year, eit_output_path, headers_file,
+#                                          eft_output_path)
+# =============================================================================
 #%% Running excel can be very tempramental so it can be better to simply create 
 # an input file that can be copied into the EFT
+road_type = 'London - Inner'
 eft_input = modelled_roads_gradients.generate_EFT_input(tcps, road_type, 
                                                     'Output/BHAQpy_example_EFT_input.csv')
 
