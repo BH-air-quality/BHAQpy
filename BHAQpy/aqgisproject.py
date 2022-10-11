@@ -732,9 +732,10 @@ class AQgisProject(AQgisProjectBasemap):
                 raise Exception(f"{attr_name} not an attribute of {asp_layer}")
 
         asp_values = []
-        for asp_feature in asp_layer.getFeatures():
+        asp_features = asp_layer.getFeatures()
+        for asp_feature in asp_features:
             asp_feature_id = asp_feature[id_attr_name]
-            asp_feature_min_height = asp_feature[min_height_attr_name]
+            asp_feature_min_height = float(asp_feature[min_height_attr_name])
             
             # define the separation distance 
             if separation_distance_attr_name is not None:
@@ -747,12 +748,22 @@ class AQgisProject(AQgisProjectBasemap):
                 asp_feature_sep_dist = 1
                 multiple_heights = False
             
+            # check for null sep distances 
+            if str(asp_feature_sep_dist) == 'NULL':
+                asp_feature_sep_dist = 1
+                multiple_heights = False
+            else:
+               asp_feature_sep_dist = float(asp_feature_sep_dist) 
             
             # define max height of receptor
             if max_height_attr_name is not None:
                 asp_feature_max_height = asp_feature[max_height_attr_name]
+                if str(asp_feature_max_height) != 'NULL':
+                    asp_feature_max_height = float(asp_feature_max_height)
+                else:
+                    asp_feature_max_height = float(asp_feature_min_height)+asp_feature_sep_dist
             else:
-                asp_feature_max_height = asp_feature_min_height+asp_feature_sep_dist
+                asp_feature_max_height = float(asp_feature_min_height)+asp_feature_sep_dist
             
             # extract x and y coordinates
             X = asp_feature.geometry().asPoint().x()
@@ -761,7 +772,7 @@ class AQgisProject(AQgisProjectBasemap):
             asp_xy.rename_axis('ID', inplace=True)
             
             if multiple_heights:
-                height_range = np.arange(asp_feature_min_height, asp_feature_max_height, asp_feature_sep_dist)
+                height_range = np.arange(asp_feature_min_height, asp_feature_max_height+0.001, asp_feature_sep_dist)
             else:
                 height_range = [asp_feature_min_height]
             
