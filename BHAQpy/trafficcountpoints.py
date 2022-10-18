@@ -112,7 +112,9 @@ class TrafficCountPoints():
             raise Exception("No valid traffic count id column identified.")
         
         #filter NULL values
-        tcp_df_raw = tcp_df_raw[tcp_df_raw[f_tcp_id_col_name].apply(lambda x: type(x) == int)]
+        tcp_df_raw = tcp_df_raw[tcp_df_raw[f_tcp_id_col_name].apply(lambda x: type(x) == int 
+                                                                    or type(x) == str
+                                                                    or type(x) == float)]
         
         # ensure consistent format
         required_columns = columns_values.copy()
