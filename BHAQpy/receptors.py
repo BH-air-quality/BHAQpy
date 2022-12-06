@@ -4,7 +4,6 @@ Created on Mon Dec  5 14:46:57 2022
 
 @author: kbenjamin
 """
-import os
 import pandas as pd
 import numpy as np
 from itertools import product

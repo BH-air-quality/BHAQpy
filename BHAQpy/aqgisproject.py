@@ -165,6 +165,9 @@ class AQgisProjectBasemap():
         if os.path.exists(project_qgs_path):
             raise Exception(f"Project {project_qgs_path} already exists.")
         
+        if not os.path.exists(site_geom_source):
+            raise Exception(f"Site geom source {site_geom_source} does not exist.")
+        
         base_project = self.get_project()
         
         # the initial layer sources (these get re assigned ugh)
