@@ -70,20 +70,36 @@ print(site_bg_concs_2019.T)
 # Separation
 # add a new monitoring layer
 receptors_path = 'GIS/receptors.shp'
-receptors_layer_name = 'Receptors'
+receptors_layer_name = 'receptors'
 # read the file using pyqgis
 receptors_layer = QgsVectorLayer(receptors_path, receptors_layer_name)
 example_project.add_layer(receptors_layer)
 example_project.save()
 #%%
 # now write an asp file with all of our receptors at each separation
-asp_save_path = 'Output/receptors.asp'
-example_project.generate_ASP(receptors_layer_name, asp_save_path, 
+receptors = BHAQpy.Receptors(example_project, 'receptors', 
                              id_attr_name = 'ReceptorID',
                              min_height_attr_name='Min height',
-                             max_height_attr_name='Max height', 
-                             separation_distance_attr_name='Separation')
+                             max_height_attr_name=None, 
+                             separation_distance_attr_name=None)
 
+print(receptors.get_attributes_df())
+#get saemple addresses for the first receptors
+receptor_addresses = receptors.get_address_sample()
+print(receptor_addresses)
+# define some address we want to exclude
+exclude_addr_lines = ['London Borough of Islington', 'London', 'Greater London', 'England', 'United Kingdom']
+#get addresses for all receptors
+recpetor_addresses = receptors.get_addresses(exclude_addr_lines)
+
+#get defra background concentrations
+receptor_bg_conc = receptors.get_defra_background_concentrations(background_region='Greater_London',
+                                                                 BG_maps_grid_layer='LAQM 2018 BG Ref clipped')
+
+#save receptors as an asp
+asp_save_path = 'Output/receptors.asp'
+asp_df = receptors.generate_ASP(asp_save_path)
+print(asp_df)
 #%%
 # end this instance of qgis
 if run_environment == 'standalone':

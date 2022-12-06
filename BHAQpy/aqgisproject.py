@@ -299,9 +299,6 @@ class AQgisProject(AQgisProjectBasemap):
     
     add_monitoring_sites()
         add monioting sites to project. TODO.
-        
-    generate_ASP()
-        Create an asp file based on points within QGIS project.
     
     save()
         write QGIS project
@@ -679,118 +676,7 @@ class AQgisProject(AQgisProjectBasemap):
         
         self.save()
         
-        return 
-    
-    def generate_ASP(self, asp_layer_name, output_file_path, id_attr_name = 'ID',
-                     min_height_attr_name = 'Height', max_height_attr_name=None,
-                     separation_distance_attr_name=None):
-        """
-        Create an asp file based on a layer within the project. 
-        Specified points are created at specified intervals (determined by value in separation_distance_attr_name) up to a specified maximum height (determined by value in max_height_attr_name).
-        If these parameters are None then specified points are only generated at value specified in the layers attribute specified in min_height_attr_name
-
-        Parameters
-        ----------
-        asp_layer_name : str
-            Layer within the project representing the asp specified points.
-        output_file_path : str
-            Path to the file at which asp file will be saved.
-        id_attr_name : str, optional
-            The layer attribute containing the ID/name of the specificed point. The default is 'ID'.
-        min_height_attr_name : str, optional
-            The layer attribute containing the minimum height of the specificed point. The default is 'Height'.
-        max_height_attr_name : str, optional
-            The layer attribute containing the maximum of the specificed points. 
-            If None then specifed points are noly created at value specified in min_height_attr_name. 
-            If not None then specified points are created at value specified in the layers attribute specified in min_height_attr_name
-            If  The default is None.
-        separation_distance_attr_name : str, optional
-            The layer attribute containing the height separation of the specificed points. The default is None.
-
-        Returns
-        -------
-        asp_df : pandas.DataFrame
-            Pandas dataframe containing all specified point ID, X, Y, Z.
-
-        """
-        
-        project = self.get_project()
-        asp_layer = select_layer_by_name(asp_layer_name, project)
-        
-        asp_layer_fields = [field.name() for field in asp_layer.fields()]
-        
-        # test if atrributes are defined correctly
-        attr_names = [id_attr_name, min_height_attr_name]
-        if max_height_attr_name is not None:
-            attr_names.append(max_height_attr_name)
-        
-        if separation_distance_attr_name is not None:
-            attr_names.append(separation_distance_attr_name)
-        
-        for attr_name in attr_names:
-            if attr_name not in asp_layer_fields:
-                raise Exception(f"{attr_name} not an attribute of {asp_layer}")
-
-        asp_values = []
-        asp_features = asp_layer.getFeatures()
-        for asp_feature in asp_features:
-            asp_feature_id = asp_feature[id_attr_name]
-            asp_feature_min_height = float(asp_feature[min_height_attr_name])
-            
-            # define the separation distance 
-            if separation_distance_attr_name is not None:
-                asp_feature_sep_dist = asp_feature[separation_distance_attr_name]
-                if asp_feature_sep_dist != 0:
-                    multiple_heights = True
-                else:
-                    multiple_heights = False
-            else:
-                asp_feature_sep_dist = 1
-                multiple_heights = False
-            
-            # check for null sep distances 
-            if str(asp_feature_sep_dist) == 'NULL':
-                asp_feature_sep_dist = 1
-                multiple_heights = False
-            else:
-               asp_feature_sep_dist = float(asp_feature_sep_dist) 
-            
-            # define max height of receptor
-            if max_height_attr_name is not None:
-                asp_feature_max_height = asp_feature[max_height_attr_name]
-                if str(asp_feature_max_height) != 'NULL':
-                    asp_feature_max_height = float(asp_feature_max_height)
-                else:
-                    asp_feature_max_height = float(asp_feature_min_height)+asp_feature_sep_dist
-            else:
-                asp_feature_max_height = float(asp_feature_min_height)+asp_feature_sep_dist
-            
-            # extract x and y coordinates
-            X = asp_feature.geometry().asPoint().x()
-            Y = asp_feature.geometry().asPoint().y()
-            asp_xy = pd.DataFrame({'X':X, 'Y':Y}, index=[asp_feature_id])
-            asp_xy.rename_axis('ID', inplace=True)
-            
-            if multiple_heights:
-                height_range = np.arange(asp_feature_min_height, asp_feature_max_height+0.001, asp_feature_sep_dist)
-            else:
-                height_range = [asp_feature_min_height]
-            
-            asp_z = pd.DataFrame(product([asp_feature_id], height_range),
-                                          columns=['ID', 'Z']).set_index('ID')
-            
-            asp_xyz = asp_xy.join(asp_z).reset_index()
-            
-            if multiple_heights:
-                asp_xyz['ID'] = asp_xyz['ID'].astype(str) + '(' + asp_xyz['Z'].astype(str) + ')'
-            
-            asp_values.extend(asp_xyz.values)
-            
-        asp_df = pd.DataFrame(asp_values, columns = ['ID', 'X', 'Y', 'Z'])
-        
-        asp_df.to_csv(output_file_path, index=False, header=False)
-        
-        return asp_df
+        return
     
     def save(self):
         """

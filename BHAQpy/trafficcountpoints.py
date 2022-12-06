@@ -37,8 +37,6 @@ class TrafficCountPoints():
                  HDV_AADT_col_name = 'HDV AADT', speed_col_name = 'Sp_kph',
                  project = None):
         """
-        
-
         Parameters
         ----------
         source : str
@@ -63,13 +61,11 @@ class TrafficCountPoints():
         """
         
        
-        # TODO: add read from file functionality
         # TODO: get XY coordinates
         self.source = source
         self.project = project
         if type(source) != str:
             raise Exception("Source must be a string of layer name or file path")
-             ##TODO: create a new template layer
          
          # if running from CSV
         if ".csv" in source:
