@@ -439,7 +439,7 @@ class ModelledRoads():
         
         # get a pd series with gradient for each road link
         road_gradients = _calculate_gradient_by_road(road_verticies, DTM_layer)
-        
+
         #update layer attrs with gradient+
         modelled_roads_layer = self.layer
         modelled_roads_fields = [f.name() for f in modelled_roads_layer.fields()]
@@ -465,8 +465,7 @@ class ModelledRoads():
                                     'OUTPUT': 'TEMPORARY_OUTPUT'})
         
         return verticies['OUTPUT']
-    
-    
+
 # further utility functions
 def _calc_gradient_percentage(distances, heightsAOD):
 
@@ -496,6 +495,7 @@ def _calc_gradient_percentage(distances, heightsAOD):
     percentages['percentage'] = (percentages['rise']/percentages['run'])*100
 
     avg_percentage = np.mean(percentages['percentage']) 
+    
     return avg_percentage
 
 def _init_modelled_roads_layer(input_modelled_road_layer, gpkg_write_path, gpkg_layer_name,
@@ -642,9 +642,10 @@ def _calculate_gradient_by_road(road_verticies, DTM_layer):
     vertice_data['DTM_height_1'] = [np.nan if type(i) == QVariant else i for i in vertice_data['DTM_height_1']]
     
     # calculate gradient for each road
-    # TODO: try different method (GDAL calculate gradient, whole line intersection)
     road_gradients = vertice_data.groupby("Source ID").apply(lambda x: _calc_gradient_percentage(x.distance, x['DTM_height_1']))
-    
+    # replace nulls wth zero 
+    road_gradients = road_gradients.fillna(0)
+
     return road_gradients
 
 def _create_blank_gpkg_layer(gpkg_path: str, layer_name: str, geometry: int,
