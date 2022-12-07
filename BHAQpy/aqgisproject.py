@@ -8,7 +8,6 @@ Created on Thu Mar 31 09:46:07 2022
 import os
 import numpy as np
 import pandas as pd
-from itertools import product
 
 from qgis.core import (
     QgsApplication,
@@ -23,7 +22,8 @@ from qgis.core import (
     QgsPalLayerSettings,
     QgsTextFormat,
     QgsTextBufferSettings,
-    QgsVectorLayerSimpleLabeling
+    QgsVectorLayerSimpleLabeling,
+    QgsFillSymbol
 )
 
 from PyQt5.QtGui import QColor 
@@ -31,8 +31,6 @@ from PyQt5.QtGui import QColor
 from qgis.analysis import QgsNativeAlgorithms
 import processing
 from processing.core.Processing import Processing
-
-import BHAQpy
 
 from BHAQpy.modelledroads import ModelledRoads
 
@@ -161,7 +159,6 @@ class AQgisProjectBasemap():
         
         
         # set up paths
-        # TODO: make paths absolute?
         project_qgs_path = os.path.join(project_path, project_name+'.qgz')
         gpkg_path = os.path.join(project_path, project_name+'.gpkg')
         
@@ -243,7 +240,10 @@ class AQgisProjectBasemap():
             group.addLayer(clipped_layer)
             new_ADMSQ_project.remove_layer(layer)
         
-        # TODO: format into red line
+        #format into red line
+        rlb_style_prop = _rlb_style_properties()
+        _format_layer_properties(site_geom, rlb_style_prop)
+        
         project_group = new_root.findGroup("Project")
         site_geom_gpkg_layer = save_to_gpkg(site_geom, gpkg_path)
         new_project.addMapLayer(site_geom_gpkg_layer, False)
@@ -291,11 +291,11 @@ class AQgisProject(AQgisProjectBasemap):
     get_site_background_concs()
         get the defra modelled background concentration at the set_geom
     
-    get_site_buffer()
-        create a buffer layer around site geom. TODO.
+    create_site_buffer()
+        create a buffer layer around site geom.
     
     add_construction_buffers()
-        TODO
+        Create construction buffers around site geom.
     
     init_modelled_roads()
         initialise a ModelledRoads object for the project. This is the QGIS version of roads to be imported into ADMS. 
@@ -317,7 +317,7 @@ class AQgisProject(AQgisProjectBasemap):
 
     """
     
-    def __init__(self, project_path, run_environment = "qgis_gui"):
+    def __init__(self, project_path, run_environment = "standalone"):
         """
         
 
@@ -432,30 +432,21 @@ class AQgisProject(AQgisProjectBasemap):
         
         return site_background_concs
         
-    def get_site_buffer(self, buffer_size, group="Construction"):
+    def create_site_buffer(self, buffer_size):
         """
-        TODO
+        Create a QGIS layer of a buffer around site geometery.
 
         Parameters
         ----------
-        buffer_size : TYPE
-            DESCRIPTION.
-        group : TYPE, optional
-            DESCRIPTION. The default is "Construction".
-
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
+        buffer_size : float
+            Distance from site to create a buffer around.
 
         Returns
         -------
-        buffer_layer : TYPE
-            DESCRIPTION.
+        buffer_layer : QgsVectorLayer
+            QGIS vector layer of buffer_size distance around the site geometry.
 
         """
-        
-        # TODO
         
         if 'site_geometry' not in dir(self):
             raise Exception('site_geometry not set. Set with set_site_geom function')
@@ -464,12 +455,17 @@ class AQgisProject(AQgisProjectBasemap):
         buffer_layer_name = 'site_buffer_'+str(buffer_size)+'m'
         
         if 'gpkg_path' not in dir(self):
-            project_path = self.project_path
+            project_path = os.path.split(self.project_path)[0]
             output = os.path.join(project_path, buffer_layer_name) + ".shp"
+            if os.path.exists(output):
+                raise Exception(f"{output} already exists, please remove existing file.")
+            else:
+                print(f'gpkg_path not set: saving {buffer_size}m buffer to {output}')
         else:
             gpkg_path = self.gpkg_path
             output = 'ogr:dbname=\"'+gpkg_path+'\" table=\"'+buffer_layer_name+'\" (geom) sql='
-            
+            print(f'Saving {buffer_size}m buffer to {gpkg_path} table={buffer_layer_name}')
+        
         buffer_result = processing.run("native:buffer", {'INPUT':site_geom.source(),
                 'DISTANCE':buffer_size,'SEGMENTS':30,'END_CAP_STYLE':0,'JOIN_STYLE':0,
                 'MITER_LIMIT':2,'DISSOLVE':False,
@@ -480,33 +476,45 @@ class AQgisProject(AQgisProjectBasemap):
         if type(buffer_result['OUTPUT']) == QgsVectorLayer:
             buffer_layer = buffer_result['OUTPUT']
         else:
-            buffer_layer = QgsVectorLayer(buffer_result['OUTPUT'], site_geom.name(), "ogr")
-        
-        BHAQpy_dir = os.path.split(BHAQpy.__path__[0])[0]
-        styles_dir = os.path.join(BHAQpy_dir, 'templates', 'styles')
-        
-        #TODO: replace this crap
-        style_path = os.path.join(styles_dir , str(buffer_size)+'m buffer')
-        style_path += '.qml'
-
-        if not os.path.exists(style_path):
-            buffer_layer.setOpacity(0.5)
-            
-            renderer = buffer_layer.renderer().clone()
-             
-            if buffer_size == 500:
-                renderer.symbol().setColor(QColor('green'))
-            elif buffer_size == 1000:
-                renderer.symbol().setColor(QColor('grey'))
-            
-            buffer_layer.setRenderer(renderer)
-        else:
-            buffer_layer.loadNamedStyle(style_path)
+            buffer_layer = QgsVectorLayer(buffer_result['OUTPUT'], buffer_layer_name, "ogr")
         
         return buffer_layer
         
-    def add_construction_buffers(self):
-        pass
+    def add_construction_buffers(self, buffer_distances=[20,50,100,350], layer_group="Dist from Site"):
+        """
+        Add construction buffers to a project 
+
+        Parameters
+        ----------
+        buffer_distances : list, optional
+            The distance (in m) to create buffers for. The default is [20,50,100,350].
+        layer_group : str, optional
+            The layer group within the project to add the buffer layers to. The default is "Dist from Site".
+
+        Returns
+        -------
+        Saves construction buffers of the specified buffer_distances to the project.
+
+        """
+        buffer_style_properties = _buffer_style_properties()
+
+        project = self.get_project()
+        layer_root = project.layerTreeRoot()
+        group = layer_root.findGroup(layer_group)
+        
+        for buffer_distance in buffer_distances:
+            print(f'Creating {buffer_distance}m buffer...')
+            buffer_layer = self.create_site_buffer(buffer_distance)
+            buffer_distance_style_properties = buffer_style_properties[buffer_distance]
+            
+            _format_buffers(buffer_layer, buffer_distance_style_properties)
+            
+            project.addMapLayer(buffer_layer, False)
+            group.addLayer(buffer_layer)
+        
+        self.save()
+        
+        return
         
     def init_modelled_roads(self, modelled_roads_layer_name = None, 
                             gpkg_write_path='modelled_roads.gpkg',
@@ -844,3 +852,33 @@ def _format_monitoring_sites(monitoring_site_layer, rules):
     monitoring_site_layer.triggerRepaint()
     
     return monitoring_site_layer
+
+def _format_layer_properties(layer, style_properties, symbol_type=QgsFillSymbol):
+    renderer = layer.renderer()
+    props = renderer.symbol().symbolLayer(0).properties()
+    
+    for key, value in style_properties.items():
+        props[key] = value
+    
+    renderer.setSymbol(symbol_type.createSimple(props))
+    layer.triggerRepaint()
+    
+    return layer
+
+def _format_buffers(layer, style_properties, opacity=0.3, symbol_type=QgsFillSymbol):
+    _format_layer_properties(layer, style_properties, symbol_type=QgsFillSymbol)
+    _ = layer.setOpacity(opacity)
+    layer.triggerRepaint()
+    
+    return layer
+    
+def _rlb_style_properties():
+    return {'color' : '0,0,0,0', 'outline_color' : "228,26,28,255",
+            'outline_width' : '0.96'}
+    
+    
+def _buffer_style_properties():
+    return {20 : {'color' : '251,0,10,255', 'outline_color' : "230,35,35,255"},
+            50 : {'color' : "251,83,10,255", 'outline_color' : "230,35,35,255"},
+            100 : {'color' : "251,194,68,255", 'outline_color' : "230,35,35,255"},
+            350 : {'color' : "196,194,68,255", 'outline_color' : "230,35,35,255"}}

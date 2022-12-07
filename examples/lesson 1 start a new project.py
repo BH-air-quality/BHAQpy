@@ -20,18 +20,16 @@ from qgis.core import (
     QgsVectorLayer
 )
 #%%
-# we are running as a standalone python script (not within qgis GUI)
-run_environment = 'standalone'
 
 # the name our project will be saved
 project_name = 'BHAQpy_example'
 # path to where the project will be saved
-project_dir = 'GIS'
+project_dir = 'examples/GIS'
 #%%
 # path to our QGIS basemap
 base_project_path = "C:/Users/kbenjamin/BuroHappold/Environment - 07 Air Quality/2. GIS/1. QGIS Base Map/AQ Basemap.qgz"
 # set up a AQgisProjectBasemap object
-basemap_project = BHAQpy.AQgisProjectBasemap(base_project_path, run_environment)
+basemap_project = BHAQpy.AQgisProjectBasemap(base_project_path)
 # a qgis project has some inherent attributes
 print('Project path:', basemap_project.project_path)
 print('Project name:', basemap_project.project_name)
@@ -61,6 +59,9 @@ example_project.save()
 # get the background concentrations at our site 
 site_bg_concs_2019 = example_project.get_site_background_concs('Greater_London', 2019)
 print(site_bg_concs_2019.T)
+#%%
+# add construction buffers
+example_project.add_construction_buffers()
 #%%
 # add our receptors layer called "receptors". 
 # It will have the following attributes:
@@ -102,5 +103,4 @@ asp_df = receptors.generate_ASP(asp_save_path)
 print(asp_df)
 #%%
 # end this instance of qgis
-if run_environment == 'standalone':
-    example_project.qgs_app.exitQgis()
+example_project.qgs_app.exitQgis()

@@ -25,12 +25,9 @@ pip install git+https://github.com/BH-air-quality/BHAQpy.git
 - pandas
 - xlwings
 
-If running from qgis qui you may need to install from osgeo shell. To do this;
-
-1. Search for your QGIS installation in the windows search bar
-2. right click and select 'Open file location'
-3. Open the OSGeo4W Shell 
-4. In the shell run `pip install xlwings`
+#### Currently supported versions
+QGIS v3.18.3-Zurich
+Python 3.10.2
 
 ## Run environment
 

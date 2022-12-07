@@ -19,14 +19,12 @@ import BHAQpy
 import os
 from qgis.core import QgsRasterLayer
 #%%
-run_environment = 'standalone'
-
 # where our project from the previous lesson is saved
 project_name = 'BHAQpy_example'
 project_dir = 'GIS'
 #%%
 # initialise a project object 
-proj = BHAQpy.AQgisProject(os.path.join(project_dir, project_name+'.qgz'), run_environment)
+proj = BHAQpy.AQgisProject(os.path.join(project_dir, project_name+'.qgz'))
 #%%
 # create a blank modelled roads layer 
 modelled_roads = proj.init_modelled_roads(gpkg_write_path='GIS/BHAQpy_example.gpkg',
@@ -104,5 +102,4 @@ eft_input = modelled_roads_gradients.generate_EFT_input(tcps, road_type,
 
 #%%
 # end this instance of qgis
-if run_environment == 'standalone':
-    proj.qgs_app.exitQgis()
+proj.qgs_app.exitQgis()
