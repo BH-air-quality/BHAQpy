@@ -54,7 +54,7 @@ class AQgisProjectBasemap():
     
     run_environment : str
         Either standalone or qgis_app. Standalone if running from a python script, 
-        qgis_app if running from qgis interface.
+        qgis_app if running from qgis interface. Currently only standalone is supported.
     
     qgs_app : 
         The details of the QGIS process that is running
@@ -73,7 +73,7 @@ class AQgisProjectBasemap():
     
     """
 
-    def __init__(self, project_path, run_environment = "qgis_gui"):
+    def __init__(self, project_path, run_environment = "standalone"):
         """
         
 
@@ -83,7 +83,7 @@ class AQgisProjectBasemap():
             The path to a qgis project.
         run_environment : TYPE, optional
             Either standalone or qgis_app. Standalone if running from a python script, 
-            qgis_app if running from qgis interface. The default is "qgis_gui".
+            qgis_app if running from qgis interface. Currently only standalone is supported.
 
         Returns
         -------
@@ -95,6 +95,9 @@ class AQgisProjectBasemap():
         
         valid_run_envs = ['qgis_gui', 'standalone']
         assert run_environment in valid_run_envs, f"run_environment must be one of: {', '.join(valid_run_envs)}"
+        
+        if run_environment == 'qgis_gui':
+            raise Exception("Using a qgis_gui run environment is currently not supported")
         
         self.run_environment = run_environment
         
