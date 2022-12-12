@@ -106,8 +106,7 @@ class Receptors:
                 raise Exception(f"{attr_name} not an attribute of {receptor_layer}")
                 
         receptor_df_raw = attributes_table_df(receptor_layer)
-        receptor_df_raw = receptor_df_raw[[id_attr_name, min_height_attr_name, 
-                                           max_height_attr_name, separation_distance_attr_name]]
+        receptor_df_raw = receptor_df_raw[attr_names]
         
         # reformat data
         f_receptor_id_col_name = 'ID'
