@@ -286,8 +286,7 @@ class Receptors:
                                    excluded_address_lines_contents=[])
         return [receptor[0], address_str]
     
-    def get_defra_background_concentrations(self, background_region, 
-                                            BG_maps_grid_layer='LAQM 2018 BG Ref clipped'):
+    def get_defra_background_concentrations(self, background_region, year):
         """
         
 
@@ -295,22 +294,18 @@ class Receptors:
         ----------
         background_region : str
             Background region as defined in defra background maps. Options: Greater_London, East_of_England, Midlands, Northern_England, Northern_Ireland, Scotland, Southern_England, Wales.
-        BG_maps_grid_layer : TYPE, optional
-            DESCRIPTION. The default is 'LAQM 2018 BG Ref clipped'.
+        year : int
+            The background year to get.
 
         Returns
         -------
         Pandas dataframe containing defra background maps concentration at each receptor.
 
         """
-        # TODO: calculate grid square from X and Y not from intersection
-        #select background maps layer (to get grid square)
+
         receptor_df = self.get_attributes_df()
-        qsg_proj = self.project.get_project()
-        BG_maps_layer = select_layer_by_name(BG_maps_grid_layer, qsg_proj)
         
         #get features 
-        BG_maps_geom = [f for f in BG_maps_layer.getFeatures()]
         receptor_geom = [f for f in self.layer.getFeatures()]
 
         receptor_grid_sq = []
@@ -318,27 +313,32 @@ class Receptors:
             receptor_ID = point[self.id_attr_name]
             receptor_geom = point.geometry()
             
-            grid_sq_intersecting = [f for f in BG_maps_geom if receptor_geom.intersects(f.geometry())] 
-            grid_sq_x = grid_sq_intersecting[0]['x']
-            grid_sq_y = grid_sq_intersecting[0]['y']
+            receptor_geom_x = receptor_geom.asPoint().x()
+            receptor_geom_y = receptor_geom.asPoint().y()
+            
+            grid_sq_x = np.floor(receptor_geom_x/1000)*1000 + 500
+            grid_sq_y = np.floor(receptor_geom_y/1000)*1000 + 500
             
             receptor_grid_sq.append([receptor_ID, grid_sq_x, grid_sq_y])    
 
         receptor_grid_sq_df = pd.DataFrame(receptor_grid_sq, columns = ['ID', 'Grid sq x', 'Grid sq y'])
 
         unique_grid_sq = receptor_grid_sq_df.groupby(['Grid sq x', 'Grid sq y'], as_index=False).size()
-
+        
+        year_2d = str(year)[-2:]
+        colnames = [f'Total_NO2_{year_2d}', f'Total_NOx_{year_2d}', 
+                    f'Total_PM10_{year_2d}', f'Total_PM2.5_{year_2d}']
+        
         grid_bg = []
         for index, row in unique_grid_sq.iterrows():
             print(row['Grid sq x'],row['Grid sq y'])
-            bg_conc = get_defra_background_concentrations([row['Grid sq x'],row['Grid sq y']], background_region, 2019)
-            bg_values = bg_conc.iloc[0][['Total_NO2_19', 'Total_NOx_19', 'Total_PM10_19', 'Total_PM2.5_19']].values
+            bg_conc = get_defra_background_concentrations([row['Grid sq x'],row['Grid sq y']], background_region, year)
+            bg_values = bg_conc.iloc[0][colnames].values
             
             bg_values = np.append([row['Grid sq x'],row['Grid sq y']], bg_values)
             grid_bg.append(bg_values)
 
-        grid_bg_df = pd.DataFrame(grid_bg, columns = ['Grid sq x', 'Grid sq y', 'Total_NO2_19', 
-                                                      'Total_NOx_19', 'Total_PM10_19', 'Total_PM2.5_19'])
+        grid_bg_df = pd.DataFrame(grid_bg, columns = ['Grid sq x', 'Grid sq y']+colnames)
 
         receptor_bg_df = pd.merge(receptor_grid_sq_df, grid_bg_df, left_on=['Grid sq x', 'Grid sq y'], 
                                     right_on = ['Grid sq x', 'Grid sq y'])

@@ -24,7 +24,7 @@ from qgis.core import (
 # the name our project will be saved
 project_name = 'BHAQpy_example'
 # path to where the project will be saved
-project_dir = 'examples/GIS'
+project_dir = 'GIS'
 #%%
 # path to our QGIS basemap
 base_project_path = "C:/Users/kbenjamin/BuroHappold/Environment - 07 Air Quality/2. GIS/1. QGIS Base Map/AQ Basemap.qgz"
@@ -94,8 +94,7 @@ exclude_addr_lines = ['London Borough of Islington', 'London', 'Greater London',
 recpetor_addresses = receptors.get_addresses(exclude_addr_lines)
 
 #get defra background concentrations
-receptor_bg_conc = receptors.get_defra_background_concentrations(background_region='Greater_London',
-                                                                 BG_maps_grid_layer='LAQM 2018 BG Ref clipped')
+receptor_bg_conc = receptors.get_defra_background_concentrations(background_region='Greater_London', year=2019)
 
 #save receptors as an asp
 asp_save_path = 'Output/receptors.asp'

@@ -23,8 +23,6 @@ def get_defra_background_concentrations(coordinates : list, background_region : 
     background_region : str
         Background region as defined in defra background maps. Options: Greater_London, East_of_England, Midlands, Northern_England, Northern_Ireland, Scotland, Southern_England, Wales.
     year : int
-        DESCRIPTION.
-    year : int
         The background year to get.
     pollutants : list, optional
         Pollutants to get background concentrations for. The default is ['no2', 'nox', 'pm10', 'pm25'].
