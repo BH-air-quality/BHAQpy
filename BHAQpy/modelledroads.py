@@ -48,7 +48,7 @@ class ModelledRoads():
     project : BHAQpy.AQgisProject
         The AQgisProject in which the modelled roads correspond to
     
-    gpkg_write_path : str
+    save_path : str
         Where the modelled roads layer is written to.
     
     layer : QGSVectorLayer 
@@ -82,8 +82,8 @@ class ModelledRoads():
     """
     
     
-    def __init__(self, project, source=None, gpkg_write_path='modelled_roads.gpkg', 
-                 gpkg_layer_name = 'Modelled Roads ADMS',
+    def __init__(self, project, source=None, save_path='modelled_roads.gpkg', 
+                 save_layer_name = 'Modelled Roads ADMS',
                  traffic_count_point_id_col_name = 'TCP ID', 
                  width_col_name = 'Width', speed_col_name = 'Speed',
                  junction_col_name = 'Junction', road_height_col_name = 'Height',
@@ -98,9 +98,9 @@ class ModelledRoads():
             The AQgisProject in which the modelled roads are added to
         source : str, optional
             The layer within a project or the path to a file containing drawn modelled roads. If None then a new layer is created. The default is None.
-        gpkg_write_path : str, optional
+        save_path : str, optional
             The path to the geopackage where the modelled roads layer will be written. The default is 'modelled_roads.gpkg'.
-        gpkg_layer_name : str, optional
+        save_layer_name : str, optional
             The name of the geopackage layer the modelled roads will be saved to. The default is 'Modelled Roads ADMS'.
         traffic_count_point_id_col_name : str, optional
             The attribute name representing the traffic count point ID. The default is 'TCP ID'.
@@ -125,7 +125,7 @@ class ModelledRoads():
         
         
         self.project = project
-        self.gpkg_write_path = gpkg_write_path 
+        self.save_path = save_path 
         
         #initialise processing
         if project.run_environment == 'standalone':
@@ -135,8 +135,8 @@ class ModelledRoads():
         if source is not None and type(source) != str:
             raise Exception("Source must be a string of layer name or file path")
         
-        if os.path.splitext(gpkg_write_path)[1] != '.gpkg':
-            raise Exception("gpkg_write_path must have a .gpkg file extension")
+        if os.path.splitext(save_path)[1] != '.gpkg':
+            raise Exception("save_path must have a .gpkg file extension")
             
         #copy road geometry with new attributes
         if source is not None:
@@ -147,8 +147,8 @@ class ModelledRoads():
             
         #standardise attributes
         modelled_road_layer = _init_modelled_roads_layer(input_modelled_road_layer, 
-                                                        gpkg_write_path,
-                                                        gpkg_layer_name,
+                                                        save_path,
+                                                        save_layer_name,
                                                         traffic_count_point_id_col_name,
                                                         width_col_name, speed_col_name,
                                                         junction_col_name, road_height_col_name,
@@ -498,7 +498,7 @@ def _calc_gradient_percentage(distances, heightsAOD):
     
     return avg_percentage
 
-def _init_modelled_roads_layer(input_modelled_road_layer, gpkg_write_path, gpkg_layer_name,
+def _init_modelled_roads_layer(input_modelled_road_layer, save_path, save_layer_name,
                 traffic_count_point_id_col_name, width_col_name, 
                 speed_col_name, junction_col_name, road_height_col_name, 
                 canyon_height_col_name, overwrite_gpkg_layer=False):
@@ -526,14 +526,14 @@ def _init_modelled_roads_layer(input_modelled_road_layer, gpkg_write_path, gpkg_
     for field in fields:
         schema.append(field)
     
-    if os.path.exists(gpkg_write_path):
+    if os.path.exists(save_path):
         append = True
     else:
         append = False
         
-    _create_blank_gpkg_layer(gpkg_write_path, gpkg_layer_name, geom, crs, schema, append, overwrite_gpkg_layer)
+    _create_blank_gpkg_layer(save_path, save_layer_name, geom, crs, schema, append, overwrite_gpkg_layer)
     
-    modelled_road_layer = QgsVectorLayer(f'{gpkg_write_path}|layername={gpkg_layer_name}', 
+    modelled_road_layer = QgsVectorLayer(f'{save_path}|layername={save_layer_name}', 
                                          'modelled roads', 'ogr')
 
     if input_modelled_road_layer is not None:
