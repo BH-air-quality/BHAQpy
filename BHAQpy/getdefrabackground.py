@@ -64,7 +64,7 @@ def get_defra_background_concentrations(coordinates : list, background_region : 
                   'bkgrd-pollutant' : pollutant,
                   'bkgrd-year' : year,
                   'action' : 'data',
-                  'year' : '2018',
+                  'year' : base_year,
                   'submit' : 'Download+CSV'}
         res = requests.get(url_base, params=params, headers={'User-Agent': 'Chrome'})
         
@@ -72,6 +72,9 @@ def get_defra_background_concentrations(coordinates : list, background_region : 
         if res.ok:
             data = res.content.decode('utf8')
             data_split = data.split('\n')[skip_header_rows:]
+            if len(data_split) == 0:
+                raise Exception('Error in API call: ' + data)
+                
             data_split_rows = [row.split(',') for row in data_split]
             
             pollutant_bg_df= pd.DataFrame(data_split_rows[1:], columns = data_split_rows[0])
