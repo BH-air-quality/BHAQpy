@@ -432,7 +432,7 @@ class AQgisProject(AQgisProjectBasemap):
         
         return site_background_concs
         
-    def create_site_buffer(self, buffer_size):
+    def create_site_buffer(self, buffer_size, buffer_layer_name_prefix):
         """
         Create a QGIS layer of a buffer around site geometery.
 
@@ -452,7 +452,7 @@ class AQgisProject(AQgisProjectBasemap):
             raise Exception('site_geometry not set. Set with set_site_geom function')
         
         site_geom = self.site_geometry
-        buffer_layer_name = 'site_buffer_'+str(buffer_size)+'m'
+        buffer_layer_name = buffer_layer_name_prefix + str(buffer_size)+'m'
         
         if 'gpkg_path' not in dir(self):
             project_path = os.path.split(self.project_path)[0]
@@ -480,7 +480,9 @@ class AQgisProject(AQgisProjectBasemap):
         
         return buffer_layer
         
-    def add_construction_buffers(self, buffer_distances=[20,50,100,350], layer_group="Dist from Site"):
+    def add_construction_buffers(self, buffer_distances=[20,50,100,350], 
+                                 buffer_layer_name_prefix='site_buffer_',
+                                 layer_group="Dist from Site"):
         """
         Add construction buffers to a project 
 
@@ -488,6 +490,8 @@ class AQgisProject(AQgisProjectBasemap):
         ----------
         buffer_distances : list, optional
             The distance (in m) to create buffers for. The default is [20,50,100,350].
+        buffer_layer_name_prefix : str, optional
+            The prefix of the name for the new layer in the geopackage. Buffer layers will be saved as buffer_layer_name_prefix + buffer_distances 
         layer_group : str, optional
             The layer group within the project to add the buffer layers to. The default is "Dist from Site".
 
@@ -504,7 +508,7 @@ class AQgisProject(AQgisProjectBasemap):
         
         for buffer_distance in buffer_distances:
             print(f'Creating {buffer_distance}m buffer...')
-            buffer_layer = self.create_site_buffer(buffer_distance)
+            buffer_layer = self.create_site_buffer(buffer_distance, buffer_layer_name_prefix)
             buffer_distance_style_properties = buffer_style_properties[buffer_distance]
             
             _format_buffers(buffer_layer, buffer_distance_style_properties)

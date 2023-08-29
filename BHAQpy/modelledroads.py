@@ -493,9 +493,13 @@ def _calc_gradient_percentage(distances, heightsAOD):
     runs = abs(np.diff(distances_2))
     percentages = pd.DataFrame({'rise' : rises, 'run' : runs})
     percentages['percentage'] = (percentages['rise']/percentages['run'])*100
-
+    
     avg_percentage = np.mean(percentages['percentage']) 
     
+    # max eft/ adms gradient is 30%
+    if avg_percentage > 30:
+        avg_percentage = 30
+        
     return avg_percentage
 
 def _init_modelled_roads_layer(input_modelled_road_layer, save_path, save_layer_name,
