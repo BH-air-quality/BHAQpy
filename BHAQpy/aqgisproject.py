@@ -506,6 +506,9 @@ class AQgisProject(AQgisProjectBasemap):
         layer_root = project.layerTreeRoot()
         group = layer_root.findGroup(layer_group)
         
+        if group is None:
+            layer_root.addGroup(layer_group)
+        
         for buffer_distance in buffer_distances:
             print(f'Creating {buffer_distance}m buffer...')
             buffer_layer = self.create_site_buffer(buffer_distance, buffer_layer_name_prefix)
