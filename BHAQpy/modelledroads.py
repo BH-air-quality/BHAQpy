@@ -664,7 +664,10 @@ def _calculate_gradient_by_road(road_verticies, DTM_layer):
     road_gradients = vertice_data.groupby("Source ID").apply(lambda x: _calc_gradient_percentage(x.distance, x['DTM_height_1']))
     # replace nulls wth zero 
     road_gradients = road_gradients.fillna(0)
-
+    
+    # replace values > 30 (max eft can handle)
+    road_gradients[road_gradients > 30] = 30
+    
     return road_gradients
 
 def _create_blank_gpkg_layer(gpkg_path: str, layer_name: str, geometry: int,
@@ -860,5 +863,4 @@ def run_eft(eft_input_list, eft_file_path, road_type, area, year,
         warnings.warn("cannot close excel")
             
     return eft_df
-
 
