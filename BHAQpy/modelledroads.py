@@ -4,7 +4,7 @@ Created on Wed Mar 30 11:10:56 2022
 
 @author: kbenjamin
 """
-
+#%%
 import pandas as pd
 import numpy as np
 import xlwings as xw
@@ -85,8 +85,10 @@ class ModelledRoads():
     def __init__(self, project, source=None, save_path='modelled_roads.gpkg', 
                  save_layer_name = 'Modelled Roads ADMS',
                  traffic_count_point_id_col_name = 'TCP ID', 
-                 width_col_name = 'Width', speed_col_name = 'Speed',
-                 junction_col_name = 'Junction', road_height_col_name = 'Height',
+                 width_col_name = 'Width', 
+                 speed_col_name = 'Speed',
+                 junction_col_name = 'Junction', 
+                 road_height_col_name = 'Height',
                  canyon_height_col_name = 'Canyon height',
                  overwrite_gpkg_layer=False):
         """
@@ -261,7 +263,8 @@ class ModelledRoads():
         
         return spt_data
     
-    def generate_VGT(self, output_file = None, headers_file = 'ADMS_template_v5.vgt'):
+    def generate_VGT(self, output_file = None, headers_file = 'ADMS_template_v5.vgt',
+                     simplify_verticies=True):
         """
         Format roads into SPT format and save to spt file if specified
 
@@ -278,7 +281,7 @@ class ModelledRoads():
             Dataframe of drawn roads in a VGT format.
 
         """
-        verticies = self._extract_verticies()
+        verticies = self._extract_verticies(simplify_verticies)
         
         #extract
         vgt_l = []
@@ -409,7 +412,7 @@ class ModelledRoads():
         
         return eft_data
             
-    def calculate_gradients(self, DTM_layers):
+    def calculate_gradients(self, DTM_layers, simplify_verticies=True):
         """
         Calulate road gradient of drawn roads, based on defra digital terrain models (DTM)
 
@@ -435,7 +438,7 @@ class ModelledRoads():
             qsg_proj = self.project.get_project()
             DTM_layer = select_layer_by_name(DTM_layers[0], qsg_proj)
         
-        road_verticies = self._extract_verticies()
+        road_verticies = self._extract_verticies(simplify_verticies)
         
         # get a pd series with gradient for each road link
         road_gradients = _calculate_gradient_by_road(road_verticies, DTM_layer)
@@ -456,13 +459,17 @@ class ModelledRoads():
         return self
     
         
-    def _extract_verticies(self):
+    def _extract_verticies(self, simplify_verticies):
         # run simplify
-        simplified = processing.run("native:simplifygeometries", {'INPUT':self.layer.source(),
-                                    'METHOD':0,'TOLERANCE':1.1,'OUTPUT':'TEMPORARY_OUTPUT'})
-        # run extract road verticies and save to temporary file
-        verticies = processing.run("native:extractvertices", {'INPUT':simplified['OUTPUT'],
-                                    'OUTPUT': 'TEMPORARY_OUTPUT'})
+        if simplify_verticies:
+            simplified = processing.run("native:simplifygeometries", {'INPUT':self.layer.source(),
+                                        'METHOD':0,'TOLERANCE':1.1,'OUTPUT':'TEMPORARY_OUTPUT'})
+            # run extract road verticies and save to temporary file
+            verticies = processing.run("native:extractvertices", {'INPUT':simplified['OUTPUT'],
+                                        'OUTPUT': 'TEMPORARY_OUTPUT'})
+        else:
+            verticies = processing.run("native:extractvertices", {'INPUT':self.layer.source(),
+                                        'OUTPUT': 'TEMPORARY_OUTPUT'})
         
         return verticies['OUTPUT']
 
@@ -538,7 +545,7 @@ def _init_modelled_roads_layer(input_modelled_road_layer, save_path, save_layer_
     _create_blank_gpkg_layer(save_path, save_layer_name, geom, crs, schema, append, overwrite_gpkg_layer)
     
     modelled_road_layer = QgsVectorLayer(f'{save_path}|layername={save_layer_name}', 
-                                         'modelled roads', 'ogr')
+                                         'modelled roads output', 'ogr')
 
     if input_modelled_road_layer is not None:
         modelled_road_layer = _copy_input_layer_geometry(modelled_road_layer, 
@@ -558,63 +565,71 @@ def _copy_input_layer_geometry(modelled_road_layer, input_modelled_road_layer,
     
     if traffic_count_point_id_col_name not in original_layer_fields:
         raise Exception((f"traffic_count_point_id_col_name: {traffic_count_point_id_col_name}"
-                        "not found in specified layer"))
+                        " not found in specified layer"))
     
     default_values = {width_col_name : 0, speed_col_name : 0, junction_col_name : False, 
                       road_height_col_name : 0, canyon_height_col_name : 0}
     
+    #run simplify at this stage
+    modelled_road_layer_simplified = processing.run("native:simplifygeometries", {'INPUT':input_modelled_road_layer.source(),
+                                                                                  'METHOD':0,'TOLERANCE':1.1,'OUTPUT':'TEMPORARY_OUTPUT'})
+    
+    modelled_road_layer_simplified = modelled_road_layer_simplified['OUTPUT']
     with edit(modelled_road_layer):
         
         dp = modelled_road_layer.dataProvider()
         
         tcp_register = []
         #look through each feature - copy the geometry but change the attributes
-        for original_feature in input_modelled_road_layer.getFeatures():
+        for original_feature in modelled_road_layer_simplified.getFeatures():
+            # check feeture length - dont add if less than 1 m
+            road_length = original_feature.geometry().length()
+            if road_length > 1:
             
-            original_tcp_id = original_feature[traffic_count_point_id_col_name]
-            
-            original_values = []
-            for col_name in list(default_values.keys()):
-                if col_name in original_layer_fields and original_feature[col_name] != NULL:
-                    original_value = original_feature[col_name]
-                else:
-                    original_value = default_values[col_name]
+                original_tcp_id = original_feature[traffic_count_point_id_col_name]
                 
-                original_values.append(original_value)
-            
-            original_width, original_speed, original_junction, original_height, original_canyon_height = original_values
-            
-            #skip if no id
-            if  original_tcp_id == NULL or original_tcp_id == '':
-                continue
-            
-            # initiate feture
-            new_feature = QgsFeature()
-            # copy geom
-            if original_feature.geometry().isNull() or original_feature.geometry().isEmpty():
-                continue
-            
-            new_feature.setGeometry(original_feature.geometry())
-            
-            # get source id
-            if original_junction == True:
-                junction_str = '.J'
-            else:
-                junction_str = ''
-            
-            tcp_id = str(original_tcp_id)+junction_str
-            number = len([i for i in tcp_register if i == tcp_id]) + 1
-            source_id = str(tcp_id) + '.' + str(number)  
-            # tracker
-            tcp_register.append(tcp_id) 
-            
-            #create feature
-            new_feature.setAttributes([None, source_id, str(original_tcp_id), 
-                                       original_junction,
-                                       original_width, original_speed,
-                                       0, original_height, original_canyon_height])
-            #add feature   
-            dp.addFeatures([new_feature])
+                original_values = []
+                for col_name in list(default_values.keys()):
+                    if col_name in original_layer_fields and original_feature[col_name] != NULL:
+                        original_value = original_feature[col_name]
+                    else:
+                        original_value = default_values[col_name]
+                    
+                    original_values.append(original_value)
+                
+                original_width, original_speed, original_junction, original_height, original_canyon_height = original_values
+                
+                #skip if no id
+                if  original_tcp_id == NULL or original_tcp_id == '':
+                    continue
+                
+                # initiate feture
+                new_feature = QgsFeature()
+                # copy geom
+                if original_feature.geometry().isNull() or original_feature.geometry().isEmpty():
+                    continue
+                
+                new_feature.setGeometry(original_feature.geometry())
+                
+                # get source id
+                if original_junction == True:
+                    junction_str = '.J'
+                else:
+                    junction_str = ''
+                
+                tcp_id = str(original_tcp_id)+junction_str
+                number = len([i for i in tcp_register if i == tcp_id]) + 1
+                source_id = str(tcp_id) + '.' + str(number)  
+                # tracker
+                tcp_register.append(tcp_id) 
+                
+                #create feature
+                new_feature.setAttributes([None, source_id, str(original_tcp_id), 
+                                           original_junction,
+                                           original_width, original_speed,
+                                           0, original_height, original_canyon_height])
+                #add feature   
+                dp.addFeatures([new_feature])
     
     return modelled_road_layer
     
@@ -845,4 +860,5 @@ def run_eft(eft_input_list, eft_file_path, road_type, area, year,
         warnings.warn("cannot close excel")
             
     return eft_df
-    
+
+
