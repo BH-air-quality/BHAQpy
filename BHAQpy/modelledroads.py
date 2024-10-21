@@ -234,8 +234,8 @@ class ModelledRoads():
       
         attr_df = self.get_attributes_df()
         
-        if not traffic_flows_used == "No" or traffic_flows_used=="Yes":
-            raise AssertionError("traffic_flows_used must be either yes or no")
+        if not (traffic_flows_used == "No" or traffic_flows_used=="Yes"):
+            raise AssertionError("traffic_flows_used must be either Yes or No")
         
         spt_dict = {'Source name' : attr_df['Source ID'],
                     'Use VAR file' : 'No',
