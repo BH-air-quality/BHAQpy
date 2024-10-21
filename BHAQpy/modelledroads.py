@@ -205,7 +205,8 @@ class ModelledRoads():
         return roads_TCP
     
     def generate_SPT(self, output_file = None, headers_file = 'ADMS_template_v5.spt', 
-                     traffic_flow_year = 2019, traffic_flow_road_type = 'London (Inner)'):
+                     traffic_flow_year = 2019, traffic_flow_road_type = 'London (Inner)',
+                     traffic_flows_used="No"):
         
         """
         Format roads into SPT format and save to spt file if specified
@@ -219,8 +220,10 @@ class ModelledRoads():
         traffic_flow_year : int, optional
             The traffic flow year. Not strictly used in modelling (as we create an EIT) but is good for consistency. The default is 2019.
         traffic_flow_road_type : str, optional
-            The traffic flow road type, as specified in EFT documentation. Not strictly used in modelling (as we create an EIT) but is good for consistency. The default is 'London (Inner)'.
-
+            The traffic flow road type, as specified in ADMS documentation.
+        traffic_flows_used : str, optional
+            Yes or No - whether emissions factors should be defined by EFT at the top of the spt file
+            
         Returns
         -------
         spt_data : pandas.DataFrame
@@ -230,6 +233,9 @@ class ModelledRoads():
         #TODO: check road types comply
       
         attr_df = self.get_attributes_df()
+        
+        if not traffic_flows_used == "No" or traffic_flows_used=="Yes":
+            raise AssertionError("traffic_flows_used must be either yes or no")
         
         spt_dict = {'Source name' : attr_df['Source ID'],
                     'Use VAR file' : 'No',
@@ -249,7 +255,7 @@ class ModelledRoads():
                     'Angle 1 (deg)' : 'na',
                     'Angle 2 (deg)' : 'na',
                     'Mixing ratio (kg/kg)' : 'na',
-                    'Traffic flows used': 'No',
+                    'Traffic flows used': traffic_flows_used,
                     'Traffic flow year' : traffic_flow_year,
                     'Traffic flow road type' : traffic_flow_road_type,
                     'Gradient' : attr_df['Gradient %'],

@@ -354,32 +354,43 @@ class AQgisProject(AQgisProjectBasemap):
         self.gpkg_path = project_gpkg_path
         return
     
-    def set_site_geom(self, site_geom_source):
+    def set_site_geom(self, site_geom_source, site_geom_gpkg_layer_name=None):
         """
         
 
         Parameters
         ----------
         site_geom_source : str
-            A path to a shapefile or layer name within the basemap project containing the geometry of a project site.
+            A path to a shapefile, geopackage, or layer name within the basemap project containing the geometry of a project site.
             e.g. BuroHappold/Environment - 07 Air Quality/1. Projects/22/PROJECT NAME/4. GIS/Red Line Boundary.shp
-
+        site_geom_gpkg_layer_name : str
+            If site_geom_source is a geopackage then this will set the layer name within the geopackage that shall be used as the
+            site geometry
         Returns
         -------
         site_geometry : QgsVectorLayer
             Vector layer containing the site geometry.
 
         """
-        #TODO check file exists
         
+        # check file suitability
         if type(site_geom_source) != str:
              raise Exception("Source must be a string of layer name or file path")
+        
         #TODO: allow geopackage
         # test if from file
         if os.path.splitext(site_geom_source)[1] != '':
-            if os.path.splitext(site_geom_source)[1] != '.shp':
-                raise Exception("site_geom_source must be a shp file or a layer name")
-            site_geometry = QgsVectorLayer(site_geom_source, "site_boundary", "ogr")
+            if os.path.splitext(site_geom_source)[1] == '.shp':
+                site_geometry = QgsVectorLayer(site_geom_source, "site_boundary", "ogr")
+            if os.path.splitext(site_geom_source)[1] == '.gpkg':
+                if type(site_geom_gpkg_layer_name) != str:
+                    raise Exception("site_geom_source from a geopackage detected. site_geom_gpkg_layer_name must be set to a valid layer within this geopackage.")
+                else:
+                    site_geometry = QgsVectorLayer(site_geom_source+'|layername='+site_geom_gpkg_layer_name, site_geom_gpkg_layer_name, 'ogr')
+            elif not os.path.exists(site_geom_source):
+                raise Exception(f"Specified site_geom_source file {site_geom_source} not found")
+            else:
+                raise Exception("site_geom_source must be a shp file, geopackage layer or a layer name within the project")
         else:
              qgs_proj = self.get_project()
              site_geometry = select_layer_by_name(site_geom_source, qgs_proj)
